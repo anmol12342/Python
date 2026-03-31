@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Mongo Agent Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f4efe7;
+      --panel: rgba(255, 251, 245, 0.92);
+      --panel-strong: #fff9f0;
+      --text: #1d2a38;
+      --muted: #617181;
+      --accent: #d96c3f;
+      --accent-dark: #b6502a;
+      --secondary: #2c7a7b;
+      --border: rgba(29, 42, 56, 0.12);
+      --shadow: 0 18px 40px rgba(37, 45, 58, 0.12);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(217, 108, 63, 0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(44, 122, 123, 0.16), transparent 26%),
+        linear-gradient(135deg, #f8f1e7 0%, #efe7db 45%, #f6f0e8 100%);
+      padding: 28px;
+    }
+
+    .app-shell {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: grid;
+      gap: 22px;
+    }
+
+    .hero,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero {
+      padding: 30px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: start;
+      flex-wrap: wrap;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.75rem;
+      color: var(--accent-dark);
+      margin: 0 0 10px;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.3rem);
+      line-height: 1;
+      max-width: 12ch;
+    }
+
+    .hero-copy {
+      max-width: 62ch;
+      color: var(--muted);
+      font-size: 1.04rem;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stat-chip {
+      min-width: 140px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--border);
+    }
+
+    .stat-chip span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-bottom: 5px;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .stat-chip strong {
+      font-size: 1.2rem;
+    }
+
+    .composer {
+      display: grid;
+      gap: 14px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    textarea {
+      flex: 1;
+      min-height: 92px;
+      resize: vertical;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      font: inherit;
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    textarea:focus,
+    select:focus,
+    input:focus {
+      border-color: rgba(217, 108, 63, 0.45);
+      box-shadow: 0 0 0 4px rgba(217, 108, 63, 0.12);
+    }
+
+    .primary-btn,
+    .ghost-btn,
+    .prompt-pill,
+    .tab-button {
+      border: none;
+      cursor: pointer;
+      transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+      font: inherit;
+    }
+
+    .primary-btn:hover,
+    .ghost-btn:hover,
+    .prompt-pill:hover,
+    .tab-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .primary-btn {
+      min-width: 150px;
+      padding: 0 22px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--accent) 0%, #ee8c5f 100%);
+      color: white;
+      font-weight: 700;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .ghost-btn {
+      padding: 12px 16px;
+      border-radius: 14px;
+      background: rgba(44, 122, 123, 0.09);
+      color: var(--secondary);
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .prompt-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .prompt-pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .status-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-family: "Trebuchet MS", sans-serif;
+      font-size: 0.92rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 22px;
+    }
+
+    .panel {
+      padding: 24px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+
+    .panel-subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .summary-card {
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      line-height: 1.65;
+      min-height: 112px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .metric-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-bottom: 6px;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .metric-card strong {
+      font-size: 1.25rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tab-button {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .tab-button.active {
+      background: var(--text);
+      color: white;
+    }
+
+    .tab-panel {
+      display: none;
+      margin-top: 18px;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeUp 0.28s ease;
+    }
+
+    .query-box {
+      background: #1c2430;
+      color: #ffd7c5;
+      border-radius: 18px;
+      padding: 18px;
+      min-height: 220px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.92rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .controls-row input,
+    .controls-row select {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.88);
+      font: inherit;
+      color: var(--text);
+    }
+
+    .table-shell {
+      overflow: auto;
+      max-height: 520px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.74);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 520px;
+    }
+
+    th,
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(29, 42, 56, 0.08);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f8efe3;
+      cursor: pointer;
+      font-family: "Trebuchet MS", sans-serif;
+      font-size: 0.9rem;
+    }
+
+    tr:hover td {
+      background: rgba(217, 108, 63, 0.05);
+    }
+
+    .chart-stage {
+      height: 380px;
+      background: rgba(255, 255, 255, 0.68);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 12px;
+    }
+
+    .empty-state,
+    .error {
+      padding: 18px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .error {
+      color: #9f2f2f;
+      background: rgba(183, 53, 53, 0.08);
+      border-color: rgba(183, 53, 53, 0.18);
+    }
+
+    .loading {
+      opacity: 0.72;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 980px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 16px;
+      }
+
+      .hero,
+      .panel {
+        padding: 18px;
+      }
+
+      .input-row {
+        flex-direction: column;
+      }
+
+      .primary-btn {
+        min-height: 52px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <section class="hero">
+      <div class="hero-top">
+        <div>
+          <p class="eyebrow">Conversational Analytics</p>
+          <h1>Ask your MongoDB like a teammate.</h1>
+          <p class="hero-copy">
+            Type a question in plain English and explore the answer as raw query JSON, an NLP summary,
+            a sortable table, and an interactive chart.
+          </p>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-chip">
+            <span>Mode</span>
+            <strong>NLP + Data</strong>
+          </div>
+          <div class="stat-chip">
+            <span>Collections</span>
+            <strong>4 linked sets</strong>
+          </div>
+          <div class="stat-chip">
+            <span>Visuals</span>
+            <strong>Switchable charts</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="composer">
+        <div class="input-row">
+          <textarea id="inputText" placeholder="Example: Show the top 5 products by average review rating and explain the trend."></textarea>
+          <button class="primary-btn" id="sendButton" onclick="askAI()">Run Analysis</button>
+        </div>
+
+        <div class="prompt-row">
+          <button class="prompt-pill" onclick="usePrompt('Show me the total amount spent by each user')">User spend by person</button>
+          <button class="prompt-pill" onclick="usePrompt('Which products have the highest average review rating?')">Top-rated products</button>
+          <button class="prompt-pill" onclick="usePrompt('Show orders by city with total revenue')">Revenue by city</button>
+          <button class="prompt-pill" onclick="usePrompt('Which users placed the most orders?')">Most active users</button>
+        </div>
+
+        <div class="status-line">
+          <span id="statusText">Ready for your next question.</span>
+          <button class="ghost-btn" onclick="clearDashboard()">Clear Results</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Result Story</h2>
+            <p class="panel-subtitle">Natural-language explanation and quick metrics generated from the returned dataset.</p>
+          </div>
+        </div>
+
+        <div id="summaryDisplay" class="summary-card">
+          Your NLP summary will appear here after a query runs.
+        </div>
+
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span>Rows returned</span>
+            <strong id="rowCount">0</strong>
+          </div>
+          <div class="metric-card">
+            <span>Chart dimension</span>
+            <strong id="chartMetric">Waiting</strong>
+          </div>
+          <div class="metric-card">
+            <span>Top label</span>
+            <strong id="topLabel">None</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Generated Query</h2>
+            <p class="panel-subtitle">The MongoDB aggregation pipeline produced from your prompt.</p>
+          </div>
+        </div>
+        <pre id="queryDisplay" class="query-box">Waiting for input...</pre>
+      </section>
+    </div>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Explore Results</h2>
+          <p class="panel-subtitle">Switch between table and chart views, filter rows, and change chart types on the fly.</p>
+        </div>
+        <div class="tabs">
+          <button class="tab-button active" data-tab="table" onclick="switchTab('table')">Table</button>
+          <button class="tab-button" data-tab="chart" onclick="switchTab('chart')">Chart</button>
+        </div>
+      </div>
+
+      <div id="tableTab" class="tab-panel active">
+        <div class="controls-row">
+          <input type="text" id="tableSearch" placeholder="Filter rows..." oninput="renderTable()" />
+          <select id="sortColumn" onchange="renderTable()">
+            <option value="">Sort by column</option>
+          </select>
+          <select id="sortDirection" onchange="renderTable()">
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </div>
+        <div id="resultDisplay" class="table-shell">
+          <div class="empty-state">No data yet. Run a question to populate the table.</div>
+        </div>
+      </div>
+
+      <div id="chartTab" class="tab-panel">
+        <div class="controls-row">
+          <select id="chartType" onchange="renderChart()">
+            <option value="bar">Bar chart</option>
+            <option value="line">Line chart</option>
+            <option value="pie">Pie chart</option>
+            <option value="doughnut">Doughnut chart</option>
+          </select>
+          <select id="labelColumn" onchange="renderChart()">
+            <option value="">Label column</option>
+          </select>
+          <select id="valueColumn" onchange="renderChart()">
+            <option value="">Value column</option>
+          </select>
+        </div>
+        <div class="chart-stage">
+          <canvas id="resultsChart"></canvas>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let chartInstance = null;
+    let originalData = [];
+    let activeColumns = [];
+
+    function usePrompt(text) {
+      document.getElementById("inputText").value = text;
+      document.getElementById("inputText").focus();
+    }
+
+    function clearDashboard() {
+      originalData = [];
+      activeColumns = [];
+      destroyChart();
+      document.getElementById("inputText").value = "";
+      document.getElementById("queryDisplay").textContent = "Waiting for input...";
+      document.getElementById("summaryDisplay").textContent = "Your NLP summary will appear here after a query runs.";
+      document.getElementById("resultDisplay").innerHTML = '<div class="empty-state">No data yet. Run a question to populate the table.</div>';
+      document.getElementById("statusText").textContent = "Ready for your next question.";
+      document.getElementById("rowCount").textContent = "0";
+      document.getElementById("chartMetric").textContent = "Waiting";
+      document.getElementById("topLabel").textContent = "None";
+      document.getElementById("tableSearch").value = "";
+      populateColumnControls([]);
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll(".tab-button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.tab === tabName);
+      });
+      document.getElementById("tableTab").classList.toggle("active", tabName === "table");
+      document.getElementById("chartTab").classList.toggle("active", tabName === "chart");
+      if (tabName === "chart") {
+        renderChart();
+      }
+    }
+
+    async function askAI() {
+      const text = document.getElementById("inputText").value.trim();
+      const queryDisplay = document.getElementById("queryDisplay");
+      const summaryDisplay = document.getElementById("summaryDisplay");
+      const resultDisplay = document.getElementById("resultDisplay");
+      const statusText = document.getElementById("statusText");
+      const sendButton = document.getElementById("sendButton");
+
+      if (!text) {
+        statusText.textContent = "Enter a question to query the database.";
+        return;
+      }
+
+      statusText.textContent = "Generating query and summary...";
+      queryDisplay.textContent = "Thinking...";
+      summaryDisplay.textContent = "Building a natural-language explanation...";
+      resultDisplay.innerHTML = '<div class="empty-state loading">Loading results...</div>';
+      sendButton.disabled = true;
+      sendButton.classList.add("loading");
+      destroyChart();
+
+      try {
+        const res = await fetch("/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await res.json();
+        queryDisplay.textContent = data.query || "No query returned.";
+        summaryDisplay.textContent = data.nlp_summary || "Summary unavailable for this result.";
+
+        if (data.error) {
+          originalData = [];
+          activeColumns = [];
+          populateColumnControls([]);
+          resultDisplay.innerHTML = `<div class="error">Database Error: ${data.error}</div>`;
+          statusText.textContent = "The request reached the backend, but the database step failed.";
+          document.getElementById("rowCount").textContent = "0";
+          document.getElementById("chartMetric").textContent = "Error";
+          document.getElementById("topLabel").textContent = "None";
+          return;
+        }
+
+        originalData = Array.isArray(data.data) ? data.data : [];
+        activeColumns = originalData.length ? Object.keys(originalData[0]) : [];
+        populateColumnControls(activeColumns);
+        renderTable();
+        renderChart();
+        updateMetrics(originalData);
+        statusText.textContent = originalData.length
+          ? `Loaded ${originalData.length} row${originalData.length === 1 ? "" : "s"} successfully.`
+          : "The query ran successfully, but it returned no rows.";
+      } catch (error) {
+        originalData = [];
+        activeColumns = [];
+        populateColumnControls([]);
+        queryDisplay.textContent = "Fetch Error";
+        summaryDisplay.textContent = "The app could not reach the backend to generate an NLP explanation.";
+        resultDisplay.innerHTML = '<div class="error">Failed to connect to backend. Make sure the FastAPI server is running.</div>';
+        statusText.textContent = "Connection error while reaching the backend.";
+        document.getElementById("rowCount").textContent = "0";
+        document.getElementById("chartMetric").textContent = "Offline";
+        document.getElementById("topLabel").textContent = "None";
+        console.error(error);
+      } finally {
+        sendButton.disabled = false;
+        sendButton.classList.remove("loading");
+      }
+    }
+
+    function populateColumnControls(columns) {
+      const sortColumn = document.getElementById("sortColumn");
+      const labelColumn = document.getElementById("labelColumn");
+      const valueColumn = document.getElementById("valueColumn");
+
+      sortColumn.innerHTML = '<option value="">Sort by column</option>';
+      labelColumn.innerHTML = '<option value="">Label column</option>';
+      valueColumn.innerHTML = '<option value="">Value column</option>';
+
+      columns.forEach((column) => {
+        sortColumn.innerHTML += `<option value="${column}">${column}</option>`;
+        labelColumn.innerHTML += `<option value="${column}">${column}</option>`;
+        valueColumn.innerHTML += `<option value="${column}">${column}</option>`;
+      });
+
+      if (!columns.length) {
+        return;
+      }
+
+      const sample = originalData[0] || {};
+      const guessedLabel = columns.find((col) => typeof sample[col] === "string") || columns[0];
+      const guessedValue = columns.find((col) => typeof sample[col] === "number") || columns[1] || columns[0];
+
+      labelColumn.value = guessedLabel;
+      valueColumn.value = guessedValue;
+    }
+
+    function getFilteredData() {
+      const searchText = document.getElementById("tableSearch").value.trim().toLowerCase();
+      const sortColumn = document.getElementById("sortColumn").value;
+      const sortDirection = document.getElementById("sortDirection").value;
+
+      let filtered = [...originalData];
+
+      if (searchText) {
+        filtered = filtered.filter((row) =>
+          activeColumns.some((column) =>
+            String(formatCell(row[column])).toLowerCase().includes(searchText)
+          )
+        );
+      }
+
+      if (sortColumn) {
+        filtered.sort((a, b) => compareValues(a[sortColumn], b[sortColumn], sortDirection));
+      }
+
+      return filtered;
+    }
+
+    function compareValues(a, b, direction) {
+      const aValue = normalizeForSort(a);
+      const bValue = normalizeForSort(b);
+      let result = 0;
+
+      if (typeof aValue === "number" && typeof bValue === "number") {
+        result = aValue - bValue;
+      } else {
+        result = String(aValue).localeCompare(String(bValue), undefined, { numeric: true, sensitivity: "base" });
+      }
+
+      return direction === "desc" ? -result : result;
+    }
+
+    function normalizeForSort(value) {
+      if (typeof value === "number") return value;
+      if (typeof value === "string" && value.trim() !== "" && !Number.isNaN(Number(value))) {
+        return Number(value);
+      }
+      return value ?? "";
+    }
+
+    function formatCell(value) {
+      if (value === null || value === undefined) return "";
+      if (typeof value === "object") return JSON.stringify(value);
+      return value;
+    }
+
+    function renderTable() {
+      const resultDisplay = document.getElementById("resultDisplay");
+      const rows = getFilteredData();
+
+      if (!rows.length) {
+        resultDisplay.innerHTML = '<div class="empty-state">No rows match the current filters.</div>';
+        return;
+      }
+
+      let tableHTML = "<table><thead><tr>";
+      activeColumns.forEach((column) => {
+        tableHTML += `<th onclick="sortByColumn('${column}')">${column}</th>`;
+      });
+      tableHTML += "</tr></thead><tbody>";
+
+      rows.forEach((row) => {
+        tableHTML += "<tr>";
+        activeColumns.forEach((column) => {
+          tableHTML += `<td>${escapeHtml(String(formatCell(row[column])))}</td>`;
+        });
+        tableHTML += "</tr>";
+      });
+
+      tableHTML += "</tbody></table>";
+      resultDisplay.innerHTML = tableHTML;
+    }
+
+    function sortByColumn(column) {
+      const sortColumn = document.getElementById("sortColumn");
+      const sortDirection = document.getElementById("sortDirection");
+
+      if (sortColumn.value === column) {
+        sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
+      } else {
+        sortColumn.value = column;
+        sortDirection.value = "asc";
+      }
+      renderTable();
+    }
+
+    function renderChart() {
+      const rows = getFilteredData();
+      const chartType = document.getElementById("chartType").value;
+      const labelColumn = document.getElementById("labelColumn").value;
+      const valueColumn = document.getElementById("valueColumn").value;
+
+      destroyChart();
+
+      if (!rows.length || !labelColumn || !valueColumn) {
+        updateMetricLabels("Waiting", "None");
+        return;
+      }
+
+      const numericRows = rows.filter((row) => !Number.isNaN(Number(row[valueColumn])));
+      if (!numericRows.length) {
+        updateMetricLabels(valueColumn, "No numeric data");
+        return;
+      }
+
+      const labels = numericRows.map((row) => String(formatCell(row[labelColumn])));
+      const values = numericRows.map((row) => Number(row[valueColumn]));
+      const colors = [
+        "rgba(217, 108, 63, 0.78)",
+        "rgba(44, 122, 123, 0.78)",
+        "rgba(241, 165, 73, 0.78)",
+        "rgba(106, 140, 175, 0.78)",
+        "rgba(126, 87, 194, 0.78)",
+        "rgba(92, 184, 92, 0.78)"
+      ];
+
+      const ctx = document.getElementById("resultsChart").getContext("2d");
+      chartInstance = new Chart(ctx, {
+        type: chartType,
+        data: {
+          labels,
+          datasets: [{
+            label: valueColumn,
+            data: values,
+            backgroundColor: labels.map((_, index) => colors[index % colors.length]),
+            borderColor: "rgba(29, 42, 56, 0.25)",
+            borderWidth: 1.5,
+            fill: chartType === "line" ? false : true,
+            tension: 0.32
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: chartType === "pie" || chartType === "doughnut"
+            },
+            title: {
+              display: true,
+              text: `${valueColumn} by ${labelColumn}`
+            }
+          },
+          scales: chartType === "pie" || chartType === "doughnut"
+            ? {}
+            : {
+                y: { beginAtZero: true },
+                x: { ticks: { maxRotation: 35, minRotation: 0 } }
+              }
+        }
+      });
+
+      const maxIndex = values.indexOf(Math.max(...values));
+      updateMetricLabels(valueColumn, labels[maxIndex] || "None");
+    }
+
+    function destroyChart() {
+      if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+      }
+    }
+
+    function updateMetrics(rows) {
+      document.getElementById("rowCount").textContent = rows.length;
+      if (!rows.length) {
+        updateMetricLabels("No data", "None");
+        return;
+      }
+
+      const valueColumn = document.getElementById("valueColumn").value;
+      const labelColumn = document.getElementById("labelColumn").value;
+      const numericRows = rows.filter((row) => !Number.isNaN(Number(row[valueColumn])));
+      if (!numericRows.length) {
+        updateMetricLabels(valueColumn || "No metric", "No numeric data");
+        return;
+      }
+
+      const labels = numericRows.map((row) => String(formatCell(row[labelColumn])));
+      const values = numericRows.map((row) => Number(row[valueColumn]));
+      const maxIndex = values.indexOf(Math.max(...values));
+      updateMetricLabels(valueColumn, labels[maxIndex] || "None");
+    }
+
+    function updateMetricLabels(metric, topLabel) {
+      document.getElementById("chartMetric").textContent = metric || "Waiting";
+      document.getElementById("topLabel").textContent = topLabel || "None";
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    document.getElementById("inputText").addEventListener("keydown", (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        askAI();
+      }
+    });
+  </script>
+</body>
+</html>
