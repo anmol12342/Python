@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alex Rivera | Software Engineer & Architect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #22d3ee;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* --- Header & Nav --- */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 2rem;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .hero-content p {
+            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            background-color: var(--primary-dark);
+            box-shadow: 0 15px 25px -5px rgba(99, 102, 241, 0.5);
+        }
+
+        /* --- Sections General --- */
+        section {
+            padding: 100px 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -10px;
+            width: 50%;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* --- Skills Section --- */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .skill-card {
+            background: var(--bg-card);
+            padding: 2rem 1rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: var(--transition);
+        }
+
+        .skill-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .skill-card i {
+            display: block;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        /* --- Projects Section --- */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .project-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: var(--transition);
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .project-img {
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(45deg, #1e293b, #334155);
+            position: relative;
+        }
+
+        .project-img::before {
+            content: "Project Preview";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .project-info {
+            padding: 2rem;
+        }
+
+        .project-info h3 {
+            margin-bottom: 0.75rem;
+            font-size: 1.4rem;
+        }
+
+        .project-info p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .tags {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 12px;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* --- Contact Section --- */
+        .contact-container {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 4rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .contact-container h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-email {
+            font-size: 1.5rem;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            display: block;
+        }
+
+        /* --- Footer --- */
+        footer {
+            padding: 4rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero-content h1 { font-size: 3rem; }
+            .projects-grid { grid-template-columns: 1fr; }
+            .contact-container { padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <div class="logo">ALEX.DEV</div>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#projects">Work</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" id="home">
+            <div class="hero-content">
+                <p style="color: var(--primary); font-weight: 600; margin-bottom: 1rem; letter-spacing: 2px;">HI, I AM ALEX RIVERA</p>
+                <h1>Building digital products, brands, and experience.</h1>
+                <p>A Full-stack Software Engineer specializing in building (and occasionally designing) exceptional digital experiences that are fast, accessible, and visually stunning.</p>
+                <a href="#projects" class="btn btn-primary">View My Work</a>
+            </div>
+        </section>
+
+        <section id="about">
+            <h2 class="section-title">About Me</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+                <div style="color: var(--text-muted); font-size: 1.1rem;">
+                    <p style="margin-bottom: 1.5rem;">For over 6 years, I've been crafting software that bridges the gap between complex backend logic and intuitive user interfaces. I thrive at the intersection of design and engineering.</p>
+                    <p>When I'm not coding, you can find me exploring mountain trails or contributing to open-source projects. I believe in writing clean, maintainable code that solves real-world problems.</p>
+                </div>
+                <div style="background: linear-gradient(135deg, var(--primary), var(--accent)); height: 300px; border-radius: 24px; position: relative; overflow: hidden;">
+                   <!-- Placeholder for an image -->
+                   <div style="position: absolute; inset: 10px; background: var(--bg-dark); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 2rem; color: var(--primary);">
+                       &lt; CODING /&gt;
+                   </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills">
+            <h2 class="section-title">Tech Stack</h2>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <div style="color: #61DAFB; font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: bold;">React</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Frontend</div>
+                </div>
+                <div class="skill-card">
+                    <div style="color: #38B2AC; font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: bold;">Tailwind</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Styling</div>
+                </div>
+                <div class="skill-card">
+                    <div style="color: #68A063; font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: bold;">Node.js</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Backend</div>
+                </div>
+                <div class="skill-card">
+                    <div style="color: #3178C6; font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: bold;">TypeScript</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Typed JS</div>
+                </div>
+                <div class="skill-card">
+                    <div style="color: #FF9900; font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: bold;">AWS</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Cloud</div>
+                </div>
+                <div class="skill-card">
+                    <div style="color: #47A248; font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: bold;">MongoDB</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Database</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects">
+            <h2 class="section-title">Selected Projects</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="project-img"></div>
+                    <div class="project-info">
+                        <h3>Nexus SaaS Dashboard</h3>
+                        <p>A comprehensive analytics dashboard for SaaS startups. Real-time data visualization and user management system.</p>
+                        <div class="tags">
+                            <span class="tag">Next.js</span>
+                            <span class="tag">D3.js</span>
+                            <span class="tag">PostgreSQL</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-img"></div>
+                    <div class="project-info">
+                        <h3>CryptoVault Wallet</h3>
+                        <p>Secure, encrypted cryptocurrency wallet interface with multi-chain support and hardware wallet integration.</p>
+                        <div class="tags">
+                            <span class="tag">React Native</span>
+                            <span class="tag">Web3.js</span>
+                            <span class="tag">Rust</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-img"></div>
+                    <div class="project-info">
+                        <h3>FlowState AI</h3>
+                        <p>An AI-powered productivity tool that optimizes deep work sessions using behavioral data and LLM assistance.</p>
+                        <div class="tags">
+                            <span class="tag">Python</span>
+                            <span class="tag">OpenAI</span>
+                            <span class="tag">Redis</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <div class="contact-container">
+                <h2 style="margin-bottom: 1rem;">Let's work together.</h2>
+                <p style="color: var(--text-muted); margin-bottom: 2.5rem;">Currently looking for new opportunities or just to say hi.</p>
+                <a href="mailto:hello@alexrivera.dev" class="contact-email">hello@alexrivera.dev</a>
+                <div>
+                    <a href="#" class="btn btn-primary">Download Resume</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="social-links">
+            <a href="#">GitHub</a>
+            <a href="#">LinkedIn</a>
+            <a href="#">Twitter</a>
+            <a href="#">Dribbble</a>
+        </div>
+        <p>&copy; 2023 Alex Rivera. Designed with precision & passion.</p>
+    </footer>
+
+</body>
+</html>

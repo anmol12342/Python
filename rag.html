@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF RAG Chat</title>
+  <style>
+    :root {
+      --bg: #f3ece2;
+      --panel: rgba(255, 250, 244, 0.92);
+      --panel-strong: #fffaf4;
+      --ink: #1b2735;
+      --muted: #667482;
+      --accent: #dc7044;
+      --accent-dark: #b6542e;
+      --teal: #2c7a7b;
+      --line: rgba(27, 39, 53, 0.12);
+      --shadow: 0 18px 40px rgba(31, 40, 54, 0.12);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(220, 112, 68, 0.2), transparent 28%),
+        radial-gradient(circle at top right, rgba(44, 122, 123, 0.15), transparent 24%),
+        linear-gradient(135deg, #f8f1e8 0%, #eee4d8 46%, #f9f4ec 100%);
+      padding: 24px;
+    }
+
+    .app {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      padding: 22px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.74rem;
+      color: var(--accent-dark);
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+    }
+
+    .title-wrap p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      max-width: 66ch;
+      line-height: 1.6;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn, .send-btn, .ghost-btn, .prompt-pill {
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      font: inherit;
+      transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .nav-btn:hover, .send-btn:hover, .ghost-btn:hover, .prompt-pill:hover {
+      transform: translateY(-1px);
+    }
+
+    .nav-btn, .ghost-btn, .prompt-pill {
+      background: rgba(44, 122, 123, 0.08);
+      color: var(--teal);
+      border: 1px solid rgba(44, 122, 123, 0.16);
+    }
+
+    .send-btn {
+      color: white;
+      background: linear-gradient(135deg, var(--accent) 0%, #ee8e63 100%);
+      font-weight: 700;
+      font-family: "Trebuchet MS", sans-serif;
+      box-shadow: 0 10px 24px rgba(220, 112, 68, 0.22);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+    }
+
+    .chat-shell {
+      display: grid;
+      gap: 16px;
+    }
+
+    .chat-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .meta-card {
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+    }
+
+    .meta-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-bottom: 6px;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .meta-card strong {
+      font-size: 1.08rem;
+    }
+
+    .prompt-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chat-window {
+      min-height: 460px;
+      max-height: 640px;
+      overflow: auto;
+      padding: 18px;
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.78), rgba(249,242,232,0.88)),
+        radial-gradient(circle at top right, rgba(220,112,68,0.08), transparent 34%);
+      border: 1px solid var(--line);
+      display: grid;
+      gap: 14px;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 88%;
+    }
+
+    .message.user {
+      justify-self: end;
+      align-items: end;
+    }
+
+    .message.assistant,
+    .message.system {
+      justify-self: start;
+      align-items: start;
+    }
+
+    .message-label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-family: "Trebuchet MS", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .bubble {
+      border-radius: 22px;
+      padding: 14px 16px;
+      line-height: 1.65;
+      box-shadow: 0 10px 20px rgba(28, 36, 48, 0.06);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .message.user .bubble {
+      background: linear-gradient(135deg, var(--accent) 0%, #ef9268 100%);
+      color: white;
+      border-bottom-right-radius: 8px;
+    }
+
+    .message.assistant .bubble {
+      background: rgba(255, 255, 255, 0.86);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-bottom-left-radius: 8px;
+    }
+
+    .message.system .bubble {
+      background: rgba(44, 122, 123, 0.08);
+      color: var(--teal);
+      border: 1px solid rgba(44, 122, 123, 0.14);
+    }
+
+    .composer {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .composer textarea {
+      width: 100%;
+      min-height: 92px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      font: inherit;
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .side-stack,
+    .two-col,
+    .three-col {
+      display: grid;
+      gap: 20px;
+    }
+
+    .side-stack {
+      align-content: start;
+    }
+
+    .three-col {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .two-col {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .feature-card,
+    .score-card,
+    .chunk-card {
+      border-radius: 18px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.74);
+    }
+
+    .feature-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .feature-card span,
+    .panel p.note {
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .nlp-card {
+      background: linear-gradient(135deg, rgba(220,112,68,0.09), rgba(255,255,255,0.84));
+      border: 1px solid rgba(220,112,68,0.18);
+      border-radius: 20px;
+      padding: 18px;
+      min-height: 140px;
+      line-height: 1.7;
+    }
+
+    .mono-box {
+      background: #1c2430;
+      color: #ffd7c5;
+      border-radius: 18px;
+      padding: 16px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 160px;
+      max-height: 340px;
+      overflow: auto;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.92rem;
+    }
+
+    .list-shell {
+      display: grid;
+      gap: 12px;
+      max-height: 480px;
+      overflow: auto;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(220, 112, 68, 0.12);
+      color: var(--accent-dark);
+      font-size: 0.82rem;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .status-line {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    @media (max-width: 1040px) {
+      .hero-grid,
+      .two-col,
+      .three-col,
+      .composer,
+      .chat-meta {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      body {
+        padding: 14px;
+      }
+
+      .panel {
+        padding: 18px;
+      }
+
+      .chat-window {
+        min-height: 380px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="panel topbar">
+      <div class="title-wrap">
+        <p class="eyebrow">Second Workflow</p>
+        <h2>PDF RAG Chat Lab</h2>
+        <p>Ask questions about a static PDF and inspect the exact retrieval logic behind the answer.</p>
+      </div>
+      <div class="nav-links">
+        <a class="nav-btn" href="/">Landing Page</a>
+        <a class="nav-btn" href="/app">Mongo Agent</a>
+        <a class="nav-btn" href="/excel-agent">Excel Agent</a>
+        <a class="nav-btn" href="/gemini-api-test">Gemini API Test</a>
+        <a class="nav-btn" href="/social-post-generator">Social Post Generator</a>
+      </div>
+    </section>
+
+    <section class="hero-grid">
+      <section class="panel chat-shell">
+        <div>
+          <p class="eyebrow">Chatbot Experience</p>
+          <h1>Talk to the PDF like a bot.</h1>
+        </div>
+
+        <div class="chat-meta">
+          <div class="meta-card">
+            <span>Document</span>
+            <strong id="documentName">Loading...</strong>
+          </div>
+          <div class="meta-card">
+            <span>Embeddings</span>
+            <strong id="embeddingSize">Loading...</strong>
+          </div>
+          <div class="meta-card">
+            <span>Vector DB</span>
+            <strong id="vectorStore">Loading...</strong>
+          </div>
+        </div>
+
+        <div class="prompt-row">
+          <button class="prompt-pill" onclick="usePrompt('What does the PDF say about hybrid retrieval?')">Hybrid retrieval</button>
+          <button class="prompt-pill" onclick="usePrompt('What benefit did the rollout produce?')">Rollout benefit</button>
+          <button class="prompt-pill" onclick="usePrompt('What features are in the roadmap?')">Roadmap features</button>
+          <button class="prompt-pill" onclick="usePrompt('How does the platform help retail managers?')">Retail managers</button>
+        </div>
+
+        <div id="chatWindow" class="chat-window">
+          <div class="message system">
+            <div class="message-label">System</div>
+            <div class="bubble">This chat is grounded on a static PDF. Ask a question and I will retrieve the best chunks, score them, and answer in natural language.</div>
+          </div>
+        </div>
+
+        <div class="composer">
+          <textarea id="questionInput" placeholder="Ask something about the PDF...">What does the PDF say about hybrid retrieval?</textarea>
+          <button class="send-btn" onclick="askRag()">Send</button>
+          <button class="ghost-btn" onclick="loadDemo()">Reload PDF</button>
+        </div>
+
+        <div id="statusText" class="status-line">Ready to query the PDF.</div>
+      </section>
+
+      <aside class="panel side-stack">
+        <div>
+          <p class="eyebrow">NLP Result</p>
+          <h3>Natural-language answer</h3>
+          <p class="note">This is the final human-readable result produced after retrieval.</p>
+        </div>
+        <div id="nlpDisplay" class="nlp-card">Your final NLP result will appear here after a RAG query.</div>
+
+        <div class="three-col">
+          <div class="feature-card">
+            <strong>1. PDF -> Text</strong>
+            <span>Extract the readable text from `sample_rag.pdf`.</span>
+          </div>
+          <div class="feature-card">
+            <strong>2. Text -> Chunks</strong>
+            <span>Split into sentences and combine them into chunk-sized passages.</span>
+          </div>
+          <div class="feature-card">
+            <strong>3. Chunks -> RAG</strong>
+            <span>Embed, store, score, retrieve, and answer from the top matches.</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="two-col">
+      <section class="panel">
+        <h3>Extracted PDF Text</h3>
+        <p class="note">This is the raw text recovered before sentence splitting and chunking.</p>
+        <div id="textDisplay" class="mono-box">Loading extracted text...</div>
+      </section>
+
+      <section class="panel">
+        <h3>Retrieval Scores</h3>
+        <p class="note">Each answer is backed by retrieved chunks ranked with cosine, keyword, and hybrid scores.</p>
+        <div id="matchDisplay" class="list-shell">
+          <div class="score-card">Run a question to inspect the scored chunks.</div>
+        </div>
+      </section>
+    </section>
+
+    <section class="panel">
+      <h3>Sentences and Stored Chunks</h3>
+      <p class="note">Each chunk below becomes a vector record in the local JSON vector database.</p>
+      <div id="chunkDisplay" class="list-shell"></div>
+    </section>
+  </div>
+
+  <script>
+    function usePrompt(text) {
+      document.getElementById("questionInput").value = text;
+      document.getElementById("questionInput").focus();
+    }
+
+    function appendMessage(role, text) {
+      const chatWindow = document.getElementById("chatWindow");
+      const message = document.createElement("div");
+      message.className = `message ${role}`;
+
+      const label = document.createElement("div");
+      label.className = "message-label";
+      label.textContent = role === "user" ? "You" : role === "assistant" ? "RAG Bot" : "System";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = text;
+
+      message.appendChild(label);
+      message.appendChild(bubble);
+      chatWindow.appendChild(message);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    async function loadDemo() {
+      const statusText = document.getElementById("statusText");
+      statusText.textContent = "Loading static PDF and rebuilding the vector store...";
+
+      const res = await fetch("/rag/demo");
+      const data = await res.json();
+
+      document.getElementById("documentName").textContent = `${data.document_name} (${data.chunks.length} chunks)`;
+      document.getElementById("embeddingSize").textContent = `${data.embedding_dimensions} dimensions`;
+      document.getElementById("vectorStore").textContent = `${data.vector_database.name} (${data.vector_database.record_count} records)`;
+      document.getElementById("textDisplay").textContent = data.extracted_text;
+      document.getElementById("nlpDisplay").textContent = "Your final NLP result will appear here after a RAG query.";
+
+      const chunkDisplay = document.getElementById("chunkDisplay");
+      chunkDisplay.innerHTML = data.chunks.map((chunk) => `
+        <div class="chunk-card">
+          <div class="badge-row">
+            <span class="badge">Chunk ${chunk.chunk_id}</span>
+            <span class="badge">${chunk.sentences.length} sentence(s)</span>
+          </div>
+          <div>${escapeHtml(chunk.text)}</div>
+        </div>
+      `).join("");
+
+      statusText.textContent = "PDF loaded. Ask a question to see the chatbot-style RAG flow.";
+    }
+
+    async function askRag() {
+      const question = document.getElementById("questionInput").value.trim();
+      if (!question) return;
+
+      appendMessage("user", question);
+      appendMessage("assistant", "Retrieving relevant chunks, comparing scores, and preparing an NLP answer...");
+      document.getElementById("nlpDisplay").textContent = "Generating final NLP result from retrieved context...";
+      document.getElementById("statusText").textContent = "Running retrieval and response generation...";
+      document.getElementById("matchDisplay").innerHTML = '<div class="score-card">Scoring chunks...</div>';
+
+      const res = await fetch("/rag/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question })
+      });
+      const data = await res.json();
+
+      const chatWindow = document.getElementById("chatWindow");
+      const pendingAssistant = chatWindow.querySelector(".message.assistant:last-child .bubble");
+      if (pendingAssistant) {
+        pendingAssistant.textContent = data.answer;
+      } else {
+        appendMessage("assistant", data.answer);
+      }
+
+      document.getElementById("nlpDisplay").textContent = data.nlp_result || data.answer;
+      document.getElementById("statusText").textContent = `Retrieved ${data.matches.length} top chunk(s) and generated the final NLP answer.`;
+      document.getElementById("matchDisplay").innerHTML = data.matches.map((match) => `
+        <div class="score-card">
+          <div class="badge-row">
+            <span class="badge">Chunk ${match.chunk_id}</span>
+            <span class="badge">Cosine ${match.cosine_score}</span>
+            <span class="badge">Keyword ${match.keyword_score}</span>
+            <span class="badge">Hybrid ${match.hybrid_score}</span>
+          </div>
+          <div>${escapeHtml(match.text)}</div>
+        </div>
+      `).join("");
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    document.getElementById("questionInput").addEventListener("keydown", (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        askRag();
+      }
+    });
+
+    loadDemo();
+  </script>
+</body>
+</html>

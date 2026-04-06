@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travis Scott | Utopia & Beyond</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff4d00;
+            --secondary: #8b4513;
+            --bg-dark: #0a0a0a;
+            --bg-card: #161616;
+            --text-light: #f4f4f4;
+            --text-dim: #a0a0a0;
+            --accent-blue: #0077ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary);
+            border-radius: 10px;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-family: 'Syncopate', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo {
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), 
+                        url('https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&q=80&w=2070');
+            background-size: cover;
+            background-position: center;
+            padding: 0 20px;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(3rem, 10vw, 8rem);
+            line-height: 1;
+            margin-bottom: 20px;
+            animation: fadeInDown 1.5s ease-out;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            color: var(--primary);
+            font-weight: 700;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+
+        .cta-btn {
+            padding: 15px 40px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 50px;
+            transition: 0.3s;
+            display: inline-block;
+        }
+
+        .cta-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 77, 0, 0.5);
+        }
+
+        /* Section Styling */
+        section {
+            padding: 100px 10%;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            border-left: 5px solid var(--primary);
+            padding-left: 20px;
+        }
+
+        /* Discography Grid */
+        .album-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .album-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: 0.4s ease;
+            position: relative;
+        }
+
+        .album-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .album-img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: rgba(255,255,255,0.1);
+            font-size: 2rem;
+            position: relative;
+        }
+
+        /* Specific gradient placeholders for aesthetic */
+        .utopia { background: linear-gradient(45deg, #222, #000); }
+        .astro { background: linear-gradient(45deg, #8b4513, #ff4d00); }
+        .birds { background: linear-gradient(45deg, #1a1a1a, #0077ff); }
+
+        .album-info {
+            padding: 20px;
+        }
+
+        .album-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .album-info p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* Cactus Jack Aesthetic Section */
+        .cactus-jack {
+            background: var(--secondary);
+            color: white;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 50px;
+            border-radius: 30px;
+            margin: 50px 10%;
+            padding: 60px;
+        }
+
+        .cactus-content {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .cactus-image {
+            flex: 1;
+            min-width: 300px;
+            height: 400px;
+            background: url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=1974') center/cover;
+            border-radius: 20px;
+            filter: grayscale(1) contrast(1.2) sepia(0.5);
+        }
+
+        /* Tour Table */
+        .tour-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        .tour-row {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: 0.3s;
+        }
+
+        .tour-row:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .tour-row td {
+            padding: 25px 15px;
+        }
+
+        .date { font-weight: 700; color: var(--primary); }
+        .venue { font-weight: 600; }
+        .location { color: var(--text-dim); }
+
+        .ticket-btn {
+            padding: 8px 20px;
+            border: 1px solid var(--text-light);
+            color: var(--text-light);
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+
+        .ticket-btn:hover {
+            background: var(--text-light);
+            color: black;
+        }
+
+        /* Footer */
+        footer {
+            padding: 80px 10% 40px;
+            background: #000;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .social-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--primary);
+        }
+
+        .copyright {
+            color: #444;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 20px; }
+            .nav-links { display: none; }
+            section { padding: 60px 5%; }
+            .cactus-jack { margin: 20px 5%; padding: 30px; }
+            .tour-row td:nth-child(3) { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#" class="logo">LA FLAME</a>
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#music">Music</a>
+            <a href="#tour">Tour</a>
+            <a href="#shop">Shop</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <p>Welcome to the world of</p>
+            <h1>Travis<br>Scott</h1>
+            <a href="#music" class="cta-btn">ENTER UTOPIA</a>
+        </div>
+    </header>
+
+    <section id="about">
+        <h2 class="section-title">The Journey</h2>
+        <p style="max-width: 800px; font-size: 1.2rem; color: var(--text-dim);">
+            Jacques Bermon Webster II, known professionally as Travis Scott, is a sonic architect and cultural phenomenon. From the hazy depths of Houston to the cosmic heights of "Astroworld," he has redefined the boundaries of hip-hop through high-octane performance and psychedelic production.
+        </p>
+    </section>
+
+    <div class="cactus-jack">
+        <div class="cactus-content">
+            <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Cactus Jack Records</h2>
+            <p style="margin-bottom: 25px;">Not just a label, but a creative collective. Founded by Scott in 2017, Cactus Jack has collaborated with some of the biggest global brands, merging music, fashion, and lifestyle into a singular, dark aesthetic.</p>
+            <a href="#" class="cta-btn" style="background: #000;">View Collective</a>
+        </div>
+        <div class="cactus-image"></div>
+    </div>
+
+    <section id="music">
+        <h2 class="section-title">Discography</h2>
+        <div class="album-grid">
+            <div class="album-card">
+                <div class="album-img utopia">UTOPIA</div>
+                <div class="album-info">
+                    <h3>UTOPIA</h3>
+                    <p>2023 • Studio Album</p>
+                </div>
+            </div>
+            <div class="album-card">
+                <div class="album-img astro">ASTROWORLD</div>
+                <div class="album-info">
+                    <h3>ASTROWORLD</h3>
+                    <p>2018 • Studio Album</p>
+                </div>
+            </div>
+            <div class="album-card">
+                <div class="album-img birds">BITTSM</div>
+                <div class="album-info">
+                    <h3>Birds in the Trap</h3>
+                    <p>2016 • Studio Album</p>
+                </div>
+            </div>
+            <div class="album-card">
+                <div class="album-img" style="background: #333;">RODEO</div>
+                <div class="album-info">
+                    <h3>Rodeo</h3>
+                    <p>2015 • Debut Album</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="tour">
+        <h2 class="section-title">Live Events</h2>
+        <table class="tour-table">
+            <tr class="tour-row">
+                <td class="date">OCT 24</td>
+                <td class="venue">SoFi Stadium</td>
+                <td class="location">Los Angeles, CA</td>
+                <td style="text-align: right;"><a href="#" class="ticket-btn">Tickets</a></td>
+            </tr>
+            <tr class="tour-row">
+                <td class="date">NOV 02</td>
+                <td class="venue">Madison Square Garden</td>
+                <td class="location">New York, NY</td>
+                <td style="text-align: right;"><a href="#" class="ticket-btn">Sold Out</a></td>
+            </tr>
+            <tr class="tour-row">
+                <td class="date">NOV 15</td>
+                <td class="venue">Toyota Center</td>
+                <td class="location">Houston, TX</td>
+                <td style="text-align: right;"><a href="#" class="ticket-btn">Tickets</a></td>
+            </tr>
+            <tr class="tour-row">
+                <td class="date">DEC 05</td>
+                <td class="venue">O2 Arena</td>
+                <td class="location">London, UK</td>
+                <td style="text-align: right;"><a href="#" class="ticket-btn">Tickets</a></td>
+            </tr>
+        </table>
+    </section>
+
+    <footer>
+        <div class="social-links">
+            <a href="#">INSTAGRAM</a>
+            <a href="#">TWITTER</a>
+            <a href="#">SPOTIFY</a>
+            <a href="#">YOUTUBE</a>
+        </div>
+        <p class="copyright">&copy; 2023 Cactus Jack / Travis Scott. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>

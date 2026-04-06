@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Support Representative</title>
+  <style>
+    :root {
+      --ink: #17202b;
+      --muted: #60707b;
+      --accent: #f06c37;
+      --accent-dark: #ca5426;
+      --teal: #155f67;
+      --panel: rgba(255, 248, 241, 0.92);
+      --card: rgba(255, 255, 255, 0.78);
+      --border: rgba(23, 32, 43, 0.1);
+      --shadow: 0 24px 60px rgba(23, 32, 43, 0.16);
+      --chat-shadow: 0 30px 70px rgba(18, 30, 45, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(240, 108, 55, 0.2), transparent 24%),
+        radial-gradient(circle at top right, rgba(21, 95, 103, 0.18), transparent 22%),
+        linear-gradient(135deg, #f9efe5 0%, #f2e3d4 52%, #fbf7f2 100%);
+      padding: 24px;
+    }
+
+    .shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      gap: 22px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-copy {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .eyebrow {
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.78rem;
+      color: var(--accent-dark);
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      line-height: 0.95;
+      max-width: 10ch;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.72;
+      max-width: 60ch;
+    }
+
+    .actions,
+    .chips {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .primary-btn,
+    .secondary-btn,
+    .toolbar-button,
+    .composer-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      padding: 0 22px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: "Trebuchet MS", sans-serif;
+      font-weight: 700;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .primary-btn:hover,
+    .secondary-btn:hover,
+    .toolbar-button:hover,
+    .composer-button:hover {
+      transform: translateY(-2px);
+    }
+
+    .primary-btn,
+    .toolbar-button,
+    .composer-button {
+      color: white;
+      background: linear-gradient(135deg, var(--accent) 0%, #ff8d5d 100%);
+      box-shadow: 0 14px 30px rgba(240, 108, 55, 0.24);
+    }
+
+    .secondary-btn {
+      color: var(--teal);
+      background: rgba(21, 95, 103, 0.08);
+      border: 1px solid rgba(21, 95, 103, 0.18);
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .feature,
+    .mini-card,
+    .sample-card {
+      padding: 16px;
+      border-radius: 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+
+    .feature strong,
+    .mini-card strong,
+    .sample-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .feature span,
+    .mini-card span,
+    .sample-card span {
+      color: var(--muted);
+      line-height: 1.58;
+    }
+
+    .hero-side {
+      padding: 28px;
+      display: grid;
+      gap: 16px;
+      align-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-side::after {
+      content: "";
+      position: absolute;
+      inset: auto -36px -50px auto;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(21, 95, 103, 0.18), transparent 70%);
+      pointer-events: none;
+    }
+
+    .mock-chat,
+    .data-preview {
+      border-radius: 22px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.84);
+    }
+
+    .mock-chat {
+      display: grid;
+      gap: 12px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.94), rgba(251,244,236,0.9)),
+        radial-gradient(circle at top right, rgba(240,108,55,0.08), transparent 30%);
+    }
+
+    .mock-bubble {
+      max-width: 86%;
+      padding: 14px 16px;
+      border-radius: 20px;
+      line-height: 1.6;
+      box-shadow: 0 10px 24px rgba(28, 36, 48, 0.06);
+    }
+
+    .mock-bubble.user {
+      margin-left: auto;
+      color: white;
+      background: linear-gradient(135deg, var(--accent) 0%, #ff9568 100%);
+      border-bottom-right-radius: 8px;
+    }
+
+    .mock-bubble.bot {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 8px;
+    }
+
+    .data-preview {
+      display: grid;
+      gap: 10px;
+      background: linear-gradient(135deg, rgba(240, 108, 55, 0.1), rgba(21, 95, 103, 0.08));
+    }
+
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(23, 32, 43, 0.08);
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .data-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .data-row span:first-child {
+      color: var(--muted);
+    }
+
+    .support-section {
+      padding: 28px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .samples {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .floating-toolbar {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 40;
+      display: grid;
+      justify-items: end;
+      gap: 14px;
+    }
+
+    .toolbar-panel {
+      width: min(400px, calc(100vw - 24px));
+      max-height: min(78vh, 740px);
+      background: rgba(255, 251, 246, 0.96);
+      border: 1px solid rgba(23, 32, 43, 0.1);
+      border-radius: 30px;
+      box-shadow: var(--chat-shadow);
+      backdrop-filter: blur(18px);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto auto;
+    }
+
+    .toolbar-panel[hidden] {
+      display: none;
+    }
+
+    .toolbar-header {
+      padding: 20px 20px 14px;
+      background: linear-gradient(135deg, rgba(240, 108, 55, 0.14), rgba(21, 95, 103, 0.12));
+      border-bottom: 1px solid rgba(23, 32, 43, 0.08);
+    }
+
+    .toolbar-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .toolbar-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #27ae60;
+      box-shadow: 0 0 0 6px rgba(39, 174, 96, 0.12);
+    }
+
+    .toolbar-subtitle {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .toolbar-quick {
+      padding: 14px 18px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .toolbar-chip {
+      min-height: 38px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(21, 95, 103, 0.18);
+      background: rgba(21, 95, 103, 0.08);
+      color: var(--teal);
+      cursor: pointer;
+      font: inherit;
+      font-family: "Trebuchet MS", sans-serif;
+      transition: transform 0.18s ease, background 0.18s ease;
+    }
+
+    .toolbar-chip:hover {
+      transform: translateY(-2px);
+    }
+
+    .toolbar-messages {
+      padding: 16px 18px;
+      overflow: auto;
+      display: grid;
+      gap: 12px;
+      min-height: 260px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.62), rgba(250,241,232,0.84)),
+        radial-gradient(circle at top right, rgba(240,108,55,0.08), transparent 30%);
+    }
+
+    .message {
+      max-width: 86%;
+      display: grid;
+      gap: 5px;
+    }
+
+    .message.assistant {
+      justify-self: start;
+    }
+
+    .message.user {
+      justify-self: end;
+    }
+
+    .message-label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .message-bubble {
+      padding: 14px 16px;
+      border-radius: 20px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      box-shadow: 0 10px 22px rgba(28, 36, 48, 0.06);
+    }
+
+    .message.assistant .message-bubble {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(23, 32, 43, 0.08);
+      border-bottom-left-radius: 8px;
+    }
+
+    .message.user .message-bubble {
+      color: white;
+      background: linear-gradient(135deg, var(--accent) 0%, #ff9466 100%);
+      border-bottom-right-radius: 8px;
+    }
+
+    .toolbar-status {
+      padding: 0 18px;
+      min-height: 22px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .toolbar-composer {
+      padding: 14px 18px 18px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .toolbar-composer textarea {
+      width: 100%;
+      min-height: 70px;
+      max-height: 160px;
+      resize: vertical;
+      border-radius: 20px;
+      border: 1px solid rgba(23, 32, 43, 0.12);
+      padding: 14px 16px;
+      font: inherit;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--ink);
+      outline: none;
+    }
+
+    @media (max-width: 920px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .features,
+      .samples {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 18px;
+      }
+
+      .hero-copy,
+      .hero-side,
+      .support-section {
+        padding: 22px;
+      }
+
+      .floating-toolbar {
+        right: 12px;
+        bottom: 12px;
+        left: 12px;
+        justify-items: stretch;
+      }
+
+      .toolbar-panel,
+      .toolbar-button {
+        width: 100%;
+      }
+
+      .toolbar-composer {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="panel hero-copy">
+        <p class="eyebrow">Customer Support Representative</p>
+        <h1>RAG chatbot for food delivery support.</h1>
+        <p class="lead">
+          This page simulates a Swiggy-style customer support representative. The floating toolbar opens a grounded support chatbot that can answer questions about delayed orders, cancellations, missing items, refunds, payment problems, and address changes using retrieval-augmented generation.
+        </p>
+
+        <div class="actions">
+          <a class="primary-btn" href="#" id="openSupportToolbar">Open Support Toolbar</a>
+          <a class="secondary-btn" href="/">Back to Landing Page</a>
+        </div>
+
+        <div class="features">
+          <div class="feature">
+            <strong>Grounded responses</strong>
+            <span>The assistant retrieves answers from a support knowledge base before responding.</span>
+          </div>
+          <div class="feature">
+            <strong>Customer support tone</strong>
+            <span>Replies are short, calm, and practical like a real food delivery representative.</span>
+          </div>
+          <div class="feature">
+            <strong>Floating toolbar UX</strong>
+            <span>The chat stays accessible in the bottom corner while the rest of the page remains visible.</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="panel hero-side">
+        <p class="eyebrow">Conversation Preview</p>
+        <div class="mock-chat">
+          <div class="mock-bubble user">My order is 30 minutes late and I still do not see movement.</div>
+          <div class="mock-bubble bot">I am sorry your order is delayed. I can help you check whether pickup is still pending or the rider is already on the way, and if the delay becomes significant support can review escalation or compensation options.</div>
+          <div class="mock-bubble user">Can I cancel now?</div>
+          <div class="mock-bubble bot">Cancellation is usually possible only before preparation starts. If the restaurant has already started preparing the food or the rider has been assigned, cancellation may be limited or only a partial refund may apply.</div>
+        </div>
+
+        <div class="data-preview">
+          <div class="data-row">
+            <span>Use case</span>
+            <strong>Food delivery support</strong>
+          </div>
+          <div class="data-row">
+            <span>AI pattern</span>
+            <strong>RAG customer support</strong>
+          </div>
+          <div class="data-row">
+            <span>Access</span>
+            <strong>Floating support toolbar</strong>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="panel support-section">
+      <p class="eyebrow">Suggested Queries</p>
+      <h2>Example support situations you can test.</h2>
+      <div class="samples">
+        <div class="sample-card">
+          <strong>Delayed order</strong>
+          <span>Ask what to do when food delivery is late and the rider has not moved.</span>
+        </div>
+        <div class="sample-card">
+          <strong>Missing item</strong>
+          <span>Ask how support handles a missing drink or an incorrect item.</span>
+        </div>
+        <div class="sample-card">
+          <strong>Cancellation</strong>
+          <span>Ask whether cancellation is still possible after preparation has started.</span>
+        </div>
+        <div class="sample-card">
+          <strong>Address change</strong>
+          <span>Ask whether the delivery address can be updated after placing the order.</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="floating-toolbar">
+    <section class="toolbar-panel" id="toolbarPanel" hidden>
+      <div class="toolbar-header">
+        <div class="toolbar-header-row">
+          <div>
+            <div class="eyebrow" style="font-size:0.72rem;">Live Support</div>
+            <h3>Food Delivery Assistant</h3>
+          </div>
+          <span class="toolbar-dot" aria-hidden="true"></span>
+        </div>
+        <p class="toolbar-subtitle">Ask about delays, refunds, missing items, payments, or address changes.</p>
+      </div>
+
+      <div class="toolbar-quick">
+        <button class="toolbar-chip" type="button" data-question="My order is delayed. What should I do?">Delayed order</button>
+        <button class="toolbar-chip" type="button" data-question="Can I cancel my order after preparation starts?">Cancel order</button>
+        <button class="toolbar-chip" type="button" data-question="An item is missing from my order. What can support do?">Missing item</button>
+        <button class="toolbar-chip" type="button" data-question="Can I change my delivery address after ordering?">Change address</button>
+      </div>
+
+      <div class="toolbar-messages" id="toolbarMessages"></div>
+      <div class="toolbar-status" id="toolbarStatus"></div>
+
+      <form class="toolbar-composer" id="toolbarForm">
+        <textarea id="toolbarInput" placeholder="Example: My order was paid for, but I do not see confirmation."></textarea>
+        <button class="composer-button" type="submit">Send</button>
+      </form>
+    </section>
+
+    <button class="toolbar-button" id="toolbarButton" type="button">Support</button>
+  </div>
+
+  <script>
+    const toolbarPanel = document.getElementById('toolbarPanel');
+    const toolbarButton = document.getElementById('toolbarButton');
+    const toolbarMessages = document.getElementById('toolbarMessages');
+    const toolbarStatus = document.getElementById('toolbarStatus');
+    const toolbarInput = document.getElementById('toolbarInput');
+    const toolbarForm = document.getElementById('toolbarForm');
+    const openSupportToolbar = document.getElementById('openSupportToolbar');
+
+    function appendMessage(role, text) {
+      const wrapper = document.createElement('div');
+      wrapper.className = `message ${role}`;
+
+      const label = document.createElement('div');
+      label.className = 'message-label';
+      label.textContent = role === 'user' ? 'You' : 'Support';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      bubble.textContent = text;
+
+      wrapper.appendChild(label);
+      wrapper.appendChild(bubble);
+      toolbarMessages.appendChild(wrapper);
+      toolbarMessages.scrollTop = toolbarMessages.scrollHeight;
+    }
+
+    function openToolbar() {
+      toolbarPanel.hidden = false;
+      toolbarButton.textContent = 'Close';
+    }
+
+    function closeToolbar() {
+      toolbarPanel.hidden = true;
+      toolbarButton.textContent = 'Support';
+    }
+
+    async function sendSupportQuestion(question) {
+      const trimmed = (question || '').trim();
+      if (!trimmed) return;
+
+      openToolbar();
+      appendMessage('user', trimmed);
+      toolbarStatus.textContent = 'Searching support knowledge base...';
+      toolbarInput.value = '';
+
+      try {
+        const response = await fetch('/support-chat/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: trimmed })
+        });
+        const result = await response.json();
+
+        if (!response.ok || result.error) {
+          toolbarStatus.textContent = 'Unable to fetch support response right now.';
+          appendMessage('assistant', 'I am sorry, I could not load the support answer right now. Please try again in a moment.');
+          return;
+        }
+
+        appendMessage('assistant', result.answer || 'I am here to help with your order.');
+        toolbarStatus.textContent = 'Grounded answer from support RAG.';
+      } catch (error) {
+        console.error(error);
+        toolbarStatus.textContent = 'Unable to reach support service.';
+        appendMessage('assistant', 'I am sorry, the support service is unavailable at the moment. Please try again shortly.');
+      }
+    }
+
+    toolbarButton.addEventListener('click', () => {
+      if (toolbarPanel.hidden) {
+        openToolbar();
+        toolbarInput.focus();
+      } else {
+        closeToolbar();
+      }
+    });
+
+    openSupportToolbar.addEventListener('click', (event) => {
+      event.preventDefault();
+      openToolbar();
+      toolbarInput.focus();
+    });
+
+    toolbarForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      await sendSupportQuestion(toolbarInput.value);
+    });
+
+    document.querySelectorAll('.toolbar-chip').forEach((button) => {
+      button.addEventListener('click', async () => {
+        await sendSupportQuestion(button.dataset.question || '');
+      });
+    });
+
+    appendMessage('assistant', 'Hi, I am your food delivery support assistant. I can help with delayed orders, cancellations, refunds, payment issues, missing items, and address changes.');
+    toolbarStatus.textContent = 'Support assistant ready.';
+  </script>
+</body>
+</html>

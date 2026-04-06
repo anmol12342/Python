@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to HTML Agent</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f9f9f9;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        #uploadForm {
+            margin-bottom: 20px;
+        }
+        #preview {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 20px;
+            background: #fff;
+        }
+        .actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .generated-pages {
+            margin-top: 24px;
+        }
+        .builder-card {
+            margin-top: 24px;
+            padding: 16px;
+            border: 1px solid #d8e3f3;
+            border-radius: 10px;
+            background: #f7fbff;
+        }
+        .builder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .builder-grid label {
+            display: block;
+            font-size: 14px;
+            color: #29415f;
+            margin-bottom: 6px;
+        }
+        .builder-grid select,
+        .builder-grid input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #c8d7eb;
+            background: #fff;
+        }
+        .helper-text {
+            margin: 8px 0 0;
+            color: #4f6278;
+            font-size: 14px;
+        }
+        .target-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .target-chip {
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #fff;
+            border: 1px solid #c8d7eb;
+            color: #29415f;
+            font-size: 13px;
+        }
+        .page-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .page-buttons a {
+            display: inline-block;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: #eef5ff;
+            color: #174a8b;
+            text-decoration: none;
+            border: 1px solid #c9daf7;
+            font-size: 14px;
+        }
+        .page-buttons a:hover {
+            background: #dfeefe;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image to HTML Agent</h1>
+        <p>Upload a UI design or wireframe image, and I will write HTML/CSS code for it.</p>
+        
+        <form id="uploadForm">
+            <input type="file" id="imageInput" accept="image/*" required>
+            <span class="actions">
+                <button type="submit" style="padding: 8px 16px; cursor: pointer;">Generate HTML</button>
+                <a id="openSavedPage" href="#" target="_blank" style="display:none; text-decoration:none; color:#174a8b;">Open saved page</a>
+            </span>
+        </form>
+        <p id="status"></p>
+        <iframe id="preview"></iframe>
+        <section class="builder-card">
+            <h2>Button Navigation Builder</h2>
+            <p class="helper-text">Pick a generated page, choose a detected button or link, then upload the screenshot for the next page.</p>
+
+            <form id="navigationForm">
+                <div class="builder-grid">
+                    <div>
+                        <label for="parentPageSelect">Parent page</label>
+                        <select id="parentPageSelect" required></select>
+                    </div>
+                    <div>
+                        <label for="targetSelect">Button or link</label>
+                        <select id="targetSelect" required></select>
+                    </div>
+                    <div>
+                        <label for="childImageInput">Next page screenshot</label>
+                        <input type="file" id="childImageInput" accept="image/*" required>
+                    </div>
+                </div>
+                <span class="actions" style="margin-top: 14px;">
+                    <button type="submit" style="padding: 8px 16px; cursor: pointer;">Generate linked page</button>
+                    <a id="openLinkedPage" href="#" target="_blank" style="display:none; text-decoration:none; color:#174a8b;">Open linked page</a>
+                </span>
+            </form>
+
+            <p id="navigationStatus" class="helper-text"></p>
+            <div id="detectedTargets" class="target-list"></div>
+        </section>
+        <section class="generated-pages">
+            <h2>Generated Pages</h2>
+            <div id="generatedPages" class="page-buttons"></div>
+        </section>
+    </div>
+
+    <script>
+        async function loadGeneratedPages(preferredFilename = null) {
+            const container = document.getElementById('generatedPages');
+            const parentSelect = document.getElementById('parentPageSelect');
+
+            try {
+                const response = await fetch('/image-to-html/generated-pages');
+                const result = await response.json();
+                const pages = Array.isArray(result.pages) ? result.pages : [];
+
+                if (!pages.length) {
+                    container.innerHTML = '<span>No generated pages yet.</span>';
+                    parentSelect.innerHTML = '<option value="">No pages available</option>';
+                    renderDetectedTargets([]);
+                    return;
+                }
+
+                container.innerHTML = pages.map((page) => (
+                    `<a href="${page.url}" target="_blank">${page.filename}</a>`
+                )).join('');
+
+                const selectedFilename = preferredFilename || parentSelect.value || pages[0].filename;
+                parentSelect.innerHTML = pages.map((page) => (
+                    `<option value="${page.filename}" ${page.filename === selectedFilename ? 'selected' : ''}>${page.filename}</option>`
+                )).join('');
+
+                await loadNavigationTargets(parentSelect.value);
+            } catch (error) {
+                container.innerHTML = '<span>Unable to load generated pages.</span>';
+                parentSelect.innerHTML = '<option value="">Unable to load pages</option>';
+                renderDetectedTargets([]);
+                console.error(error);
+            }
+        }
+
+        function renderDetectedTargets(targets) {
+            const container = document.getElementById('detectedTargets');
+            if (!targets.length) {
+                container.innerHTML = '<span class="target-chip">No clickable buttons or links detected yet.</span>';
+                return;
+            }
+
+            container.innerHTML = targets.map((target) => (
+                `<span class="target-chip">${target.label} (${target.tag})</span>`
+            )).join('');
+        }
+
+        async function loadNavigationTargets(filename) {
+            const targetSelect = document.getElementById('targetSelect');
+            const navigationStatus = document.getElementById('navigationStatus');
+
+            if (!filename) {
+                targetSelect.innerHTML = '<option value="">Select a page first</option>';
+                renderDetectedTargets([]);
+                return;
+            }
+
+            navigationStatus.innerText = 'Loading detected buttons and links...';
+
+            try {
+                const response = await fetch(`/image-to-html/page-targets/${encodeURIComponent(filename)}`);
+                const result = await response.json();
+                const targets = Array.isArray(result.targets) ? result.targets : [];
+
+                if (!targets.length) {
+                    targetSelect.innerHTML = '<option value="">No buttons or links found</option>';
+                    navigationStatus.innerText = 'This page has no detected buttons or links yet.';
+                    renderDetectedTargets([]);
+                    return;
+                }
+
+                targetSelect.innerHTML = targets.map((target) => (
+                    `<option value="${target.id}">${target.label} (${target.tag})</option>`
+                )).join('');
+                navigationStatus.innerText = `Detected ${targets.length} clickable item${targets.length === 1 ? '' : 's'} on ${filename}.`;
+                renderDetectedTargets(targets);
+            } catch (error) {
+                targetSelect.innerHTML = '<option value="">Unable to load buttons</option>';
+                navigationStatus.innerText = 'Unable to load detected buttons for that page.';
+                renderDetectedTargets([]);
+                console.error(error);
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('imageInput');
+            if (!fileInput.files.length) return;
+            const selectedFile = fileInput.files[0];
+            const savedPageLink = document.getElementById('openSavedPage');
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            document.getElementById('status').innerText = 'Generating HTML... this may take a few seconds.';
+            document.getElementById('preview').srcdoc = '';
+            savedPageLink.style.display = 'none';
+
+            try {
+                const response = await fetch('/image-to-html/generate', { method: 'POST', body: formData });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    const message = result.error || result.detail || 'Request failed.';
+                    document.getElementById('status').innerText = 'Error: ' + message;
+                    return;
+                }
+
+                if (result.error || typeof result.html !== 'string' || !result.html.trim()) {
+                    document.getElementById('status').innerText = 'Error: ' + (result.error || 'No HTML was returned.');
+                    return;
+                }
+
+                document.getElementById('status').innerText = 'Success! Here is the preview:';
+                document.getElementById('preview').srcdoc = result.html;
+                if (result.page_url) {
+                    savedPageLink.href = result.page_url;
+                    savedPageLink.style.display = 'inline-block';
+                }
+                await loadGeneratedPages(result.filename || null);
+                document.getElementById('navigationStatus').innerText = Array.isArray(result.nav_targets) && result.nav_targets.length
+                    ? 'Main page generated. You can now attach screenshots to its buttons below.'
+                    : 'Main page generated. If the design has buttons, they will appear below once detected.';
+            } catch (error) {
+                document.getElementById('status').innerText = 'Error: Unable to reach the server.';
+                console.error(error);
+            }
+        });
+
+        document.getElementById('parentPageSelect').addEventListener('change', async (e) => {
+            await loadNavigationTargets(e.target.value);
+        });
+
+        document.getElementById('navigationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const parentFilename = document.getElementById('parentPageSelect').value;
+            const targetId = document.getElementById('targetSelect').value;
+            const childImageInput = document.getElementById('childImageInput');
+            const linkedPageLink = document.getElementById('openLinkedPage');
+            const navigationStatus = document.getElementById('navigationStatus');
+
+            if (!parentFilename || !targetId || !childImageInput.files.length) {
+                navigationStatus.innerText = 'Choose a parent page, a button, and a screenshot first.';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('parent_filename', parentFilename);
+            formData.append('target_id', targetId);
+            formData.append('file', childImageInput.files[0]);
+
+            navigationStatus.innerText = 'Generating linked page and updating the selected button...';
+            linkedPageLink.style.display = 'none';
+
+            try {
+                const response = await fetch('/image-to-html/generate-linked-page', { method: 'POST', body: formData });
+                const result = await response.json();
+
+                if (!response.ok || result.error) {
+                    navigationStatus.innerText = 'Error: ' + (result.error || 'Request failed.');
+                    return;
+                }
+
+                document.getElementById('preview').srcdoc = result.html || '';
+                linkedPageLink.href = result.page_url;
+                linkedPageLink.style.display = 'inline-block';
+                navigationStatus.innerText = 'Linked page created. The selected button now opens the new page.';
+                childImageInput.value = '';
+
+                await loadGeneratedPages(result.parent_filename || parentFilename);
+                if (Array.isArray(result.parent_nav_targets)) {
+                    renderDetectedTargets(result.parent_nav_targets);
+                }
+            } catch (error) {
+                navigationStatus.innerText = 'Error: Unable to reach the server.';
+                console.error(error);
+            }
+        });
+
+        loadGeneratedPages();
+    </script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dynamic HTML Generator</title>
+  <style>
+    :root {
+      --ink: #17202b;
+      --muted: #5e6a76;
+      --accent: #e46f42;
+      --accent-dark: #bf542d;
+      --teal: #1f6f73;
+      --card: rgba(255, 249, 241, 0.9);
+      --border: rgba(23, 32, 43, 0.1);
+      --shadow: 0 24px 60px rgba(23, 32, 43, 0.16);
+    }
+    
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(228, 111, 66, 0.25), transparent 25%),
+        radial-gradient(circle at 85% 15%, rgba(31, 111, 115, 0.18), transparent 24%),
+        linear-gradient(135deg, #f7efe4 0%, #ede2d4 52%, #f9f5ee 100%);
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 42px;
+      backdrop-filter: blur(12px);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 2.5rem;
+      line-height: 1.1;
+    }
+
+    p {
+      color: var(--muted);
+      font-family: "Trebuchet MS", sans-serif;
+      line-height: 1.6;
+    }
+
+    .form-group {
+      margin: 24px 0;
+    }
+
+    label {
+      display: block;
+      font-family: "Trebuchet MS", sans-serif;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 16px;
+      font-size: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-sizing: border-box;
+      font-family: "Trebuchet MS", sans-serif;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 54px;
+      padding: 0 32px;
+      border-radius: 999px;
+      font-family: "Trebuchet MS", sans-serif;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent) 0%, #f09468 100%);
+      color: white;
+      border: none;
+      box-shadow: 0 14px 30px rgba(228, 111, 66, 0.28);
+      cursor: pointer;
+      transition: transform 0.18s ease;
+      font-size: 1.05rem;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    button:disabled {
+      background: #ccc;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .nav-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: var(--teal);
+      text-decoration: none;
+      font-family: "Trebuchet MS", sans-serif;
+      font-weight: bold;
+    }
+
+    .nav-link:hover {
+      text-decoration: underline;
+    }
+
+    .spinner {
+      display: none;
+      margin-top: 16px;
+      font-family: "Trebuchet MS", sans-serif;
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    .result {
+      margin-top: 32px;
+      display: none;
+    }
+
+    .result h3 {
+      margin-top: 0;
+    }
+
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      background: white;
+      margin-top: 16px;
+    }
+
+    .new-tab-link {
+      display: inline-block;
+      margin-top: 16px;
+      color: var(--accent-dark);
+      font-family: "Trebuchet MS", sans-serif;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .new-tab-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="/" class="nav-link">&larr; Back to Home</a>
+    <h1>Dynamic HTML Generator</h1>
+    <p>Enter any topic you can imagine. The AI will generate a complete, beautifully styled HTML page with sections, placeholder images, and content, and save it directly to the server.</p>
+    
+    <form id="generator-form">
+      <div class="form-group">
+        <label for="topic">What should the page be about?</label>
+        <input type="text" id="topic" name="topic" placeholder="e.g., A Bakery in Paris, Cyberpunk City, The History of Jazz" required />
+      </div>
+      <button type="submit" id="submit-btn">Generate My Page</button>
+      <div id="spinner" class="spinner">Generating your page... This may take 10-20 seconds. Please wait.</div>
+    </form>
+
+    <div id="result" class="result">
+      <h3>Success! File generated: <span id="filename-display" style="color: var(--teal);"></span></h3>
+      <p>Your page has been created and saved to the project directory.</p>
+      
+      <a href="#" id="new-tab-link" class="new-tab-link" target="_blank" style="display: none;">Open generated file directly (if routed)</a>
+      
+      <h4>Live Preview:</h4>
+      <iframe id="preview-frame"></iframe>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('generator-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const topicInput = document.getElementById('topic').value;
+      const btn = document.getElementById('submit-btn');
+      const spinner = document.getElementById('spinner');
+      const resultDiv = document.getElementById('result');
+      const iframe = document.getElementById('preview-frame');
+      const filenameDisplay = document.getElementById('filename-display');
+      
+      btn.disabled = true;
+      spinner.style.display = 'block';
+      resultDiv.style.display = 'none';
+      
+      try {
+        const response = await fetch('/dynamic-html-generator/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic: topicInput })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          filenameDisplay.textContent = data.filename;
+          resultDiv.style.display = 'block';
+          window.location.href = data.page_url;
+        } else {
+          alert('Error generating page: ' + data.error);
+        }
+      } catch (error) {
+        alert('An error occurred. Make sure the server is running and the API key is valid.');
+        console.error(error);
+      } finally {
+        btn.disabled = false;
+        spinner.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

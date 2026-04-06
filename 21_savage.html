@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>21 Savage | Official Artist Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #e61919;
+            --bg: #0a0a0a;
+            --text: #ffffff;
+            --gray: #1a1a1a;
+            --light-gray: #a0a0a0;
+            --accent: #ff0000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+        }
+
+        header {
+            height: 100vh;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(10,10,10,1)), 
+                        url('https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&q=80&w=1500') center/cover no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 30px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        }
+
+        .logo {
+            font-weight: 900;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .hero-content h1 {
+            font-size: clamp(4rem, 15vw, 10rem);
+            line-height: 0.9;
+            font-weight: 900;
+            margin-bottom: 20px;
+            letter-spacing: -5px;
+            text-transform: uppercase;
+            background: -webkit-linear-gradient(#fff, #555);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            letter-spacing: 5px;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 20px;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            margin-bottom: 50px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -10px;
+            width: 60px;
+            height: 4px;
+            background: var(--primary);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 150px;
+        }
+
+        .about-image {
+            width: 100%;
+            height: 500px;
+            background-color: var(--gray);
+            border-left: 8px solid var(--primary);
+            position: relative;
+        }
+
+        .about-image::before {
+            content: '21';
+            position: absolute;
+            right: -20px;
+            top: -20px;
+            font-size: 10rem;
+            font-weight: 900;
+            color: rgba(230, 25, 25, 0.1);
+            z-index: -1;
+        }
+
+        .about-text p {
+            margin-bottom: 20px;
+            color: var(--light-gray);
+            font-size: 1.1rem;
+        }
+
+        .discography {
+            margin-bottom: 150px;
+        }
+
+        .album-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .album-card {
+            background: var(--gray);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: transform 0.4s ease;
+            position: relative;
+        }
+
+        .album-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .album-art {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #252525;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 2rem;
+            color: #333;
+            transition: background 0.3s;
+        }
+
+        .album-card:hover .album-art {
+            background: var(--primary);
+            color: white;
+        }
+
+        .album-info {
+            padding: 20px;
+        }
+
+        .album-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .album-info p {
+            color: var(--light-gray);
+            font-size: 0.9rem;
+        }
+
+        .stats-banner {
+            background: var(--primary);
+            padding: 60px 0;
+            margin: 100px 0;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .stat-item h2 {
+            font-size: 3rem;
+            font-weight: 900;
+        }
+
+        .stat-item p {
+            text-transform: uppercase;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        footer {
+            padding: 100px 20px 50px;
+            text-align: center;
+            border-top: 1px solid #333;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .social-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--primary);
+        }
+
+        .copyright {
+            color: #555;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .about-grid { grid-template-columns: 1fr; }
+            .hero-content h1 { letter-spacing: -2px; }
+            .section-title { font-size: 2.5rem; }
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 30px;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: white;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">21 SAVAGE</div>
+        <div class="nav-links">
+            <a href="#about">The Artist</a>
+            <a href="#music">Discography</a>
+            <a href="#tours">Tours</a>
+            <a href="#contact">Shop</a>
+        </div>
+    </nav>
+
+    <header>
+        <div class="hero-content">
+            <p>Atlanta's Own</p>
+            <h1>21 SAVAGE</h1>
+            <a href="#music" class="btn">Listen Now</a>
+        </div>
+        <div class="scroll-indicator">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"/></svg>
+        </div>
+    </header>
+
+    <main>
+        <section id="about" class="about-grid">
+            <div class="about-image">
+                <!-- Placeholder for Image -->
+                <div style="width:100%; height:100%; background: linear-gradient(45deg, #111, #222); display: flex; align-items: center; justify-content: center;">
+                    <span style="font-weight: 900; color: #333; transform: rotate(-90deg); font-size: 4rem;">SLAUGHTER</span>
+                </div>
+            </div>
+            <div class="about-text">
+                <h2 class="section-title">The Story</h2>
+                <p>Born Shéyaa Bin Abraham-Joseph, 21 Savage has risen to become one of the most influential figures in modern hip-hop. Emerging from the Atlanta underground scene, he gained global recognition with his raw lyricism and distinct monotone flow.</p>
+                <p>His journey from the streets of East Atlanta to becoming a Grammy-winning artist and a voice for immigrant rights is one of the most compelling narratives in the industry today.</p>
+                <p>With multiple platinum records and critically acclaimed albums, he continues to redefine the sound of trap music while expanding his artistic range.</p>
+            </div>
+        </section>
+
+        <section id="music" class="discography">
+            <h2 class="section-title">Major Projects</h2>
+            <div class="album-grid">
+                <div class="album-card">
+                    <div class="album-art">AD</div>
+                    <div class="album-info">
+                        <h3>American Dream</h3>
+                        <p>2024 • Studio Album</p>
+                    </div>
+                </div>
+                <div class="album-card">
+                    <div class="album-art">SM2</div>
+                    <div class="album-info">
+                        <h3>Savage Mode II</h3>
+                        <p>2020 • Collaboration Album</p>
+                    </div>
+                </div>
+                <div class="album-card">
+                    <div class="album-art">IA&gt;IW</div>
+                    <div class="album-info">
+                        <h3>I Am > I Was</h3>
+                        <p>2018 • Studio Album</p>
+                    </div>
+                </div>
+                <div class="album-card">
+                    <div class="album-art">IS</div>
+                    <div class="album-info">
+                        <h3>Issa Album</h3>
+                        <p>2017 • Debut Studio Album</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="stats-banner">
+        <div class="stat-item">
+            <h2>20+</h2>
+            <p>Billion Streams</p>
+        </div>
+        <div class="stat-item">
+            <h2>1</h2>
+            <p>Grammy Award</p>
+        </div>
+        <div class="stat-item">
+            <h2>15</h2>
+            <p>Platinum Singles</p>
+        </div>
+    </div>
+
+    <footer>
+        <div class="social-links">
+            <a href="#">Instagram</a>
+            <a href="#">Twitter</a>
+            <a href="#">Spotify</a>
+            <a href="#">YouTube</a>
+            <a href="#">Apple Music</a>
+        </div>
+        <p class="copyright">&copy; 2024 SLAUGHTER GANG ENTERTAINMENT / EPIC RECORDS</p>
+    </footer>
+
+</body>
+</html>

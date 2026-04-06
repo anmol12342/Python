@@ -481,7 +481,13 @@
 
         <div class="status-line">
           <span id="statusText">Ready for your next question.</span>
-          <button class="ghost-btn" onclick="clearDashboard()">Clear Results</button>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a class="ghost-btn" href="/excel-agent" style="text-decoration:none;">Open Excel Agent</a>
+            <a class="ghost-btn" href="/gemini-api-test" style="text-decoration:none;">Open Gemini API Test</a>
+            <a class="ghost-btn" href="/social-post-generator" style="text-decoration:none;">Open Social Post Generator</a>
+            <a class="ghost-btn" href="/rag" style="text-decoration:none;">Open PDF RAG Lab</a>
+            <button class="ghost-btn" onclick="clearDashboard()">Clear Results</button>
+          </div>
         </div>
       </div>
     </section>

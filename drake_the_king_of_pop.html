@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drake | The King of Modern Pop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #c9a227;
+            --dark: #0a0a0a;
+            --light: #f4f4f4;
+            --gray: #222;
+            --text-muted: #888;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 10%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 2rem;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: var(--light);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), 
+                        url('https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&q=80&w=2070');
+            background-size: cover;
+            background-position: center;
+            padding: 0 5%;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 10vw, 8rem);
+            line-height: 1;
+            margin-bottom: 1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--primary);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            background: var(--primary);
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 50px;
+            transition: var(--transition);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(201, 162, 39, 0.3);
+        }
+
+        /* Content Sections */
+        section {
+            padding: 100px 10%;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 4px;
+            background: var(--primary);
+        }
+
+        .grid-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-card {
+            background: var(--gray);
+            padding: 3rem 2rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+        }
+
+        .stat-card h3 {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        /* About Section */
+        .about-flex {
+            display: flex;
+            gap: 4rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .about-image {
+            flex: 1;
+            min-width: 300px;
+            height: 500px;
+            background: linear-gradient(45deg, var(--primary), #555);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-image::before {
+            content: '6IX';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 8rem;
+            font-weight: 900;
+            opacity: 0.1;
+            color: #fff;
+        }
+
+        .about-text {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .about-text p {
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Discography */
+        .albums {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .album-art {
+            aspect-ratio: 1/1;
+            background: #1a1a1a;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .album-art span {
+            font-weight: 900;
+            font-size: 4rem;
+            opacity: 0.2;
+        }
+
+        .album-info h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .album-info p {
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* Footer */
+        footer {
+            padding: 50px 10%;
+            background: #050505;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .social-links {
+            margin-bottom: 2rem;
+        }
+
+        .social-links a {
+            color: var(--light);
+            text-decoration: none;
+            margin: 0 1rem;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            color: var(--primary);
+        }
+
+        .copyright {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            nav ul {
+                display: none;
+            }
+            .hero h1 {
+                font-size: 4rem;
+            }
+            section {
+                padding: 60px 5%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">OVO Sound</div>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#legacy">Legacy</a></li>
+            <li><a href="#stats">Stats</a></li>
+            <li><a href="#discography">Discography</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <p>The 6ix God</p>
+            <h1>DRAKE</h1>
+            <p>The King of Pop's New Era</p>
+            <a href="#legacy" class="btn">Explore the Legacy</a>
+        </section>
+
+        <!-- Stats Section -->
+        <section id="stats">
+            <div class="grid-stats">
+                <div class="stat-card">
+                    <h3>170M+</h3>
+                    <p>Records Sold</p>
+                </div>
+                <div class="stat-card">
+                    <h3>5</h3>
+                    <p>Grammy Awards</p>
+                </div>
+                <div class="stat-card">
+                    <h3>34</h3>
+                    <p>Billboard Awards</p>
+                </div>
+                <div class="stat-card">
+                    <h3>#1</h3>
+                    <p>Global Streaming Artist</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="legacy">
+            <div class="about-flex">
+                <div class="about-image"></div>
+                <div class="about-text">
+                    <h2 class="section-title">Defining a Generation</h2>
+                    <p>Aubrey "Drake" Graham has transcended hip-hop to become the definitive sound of modern popular music. By blending melodic R&B with razor-sharp rap, he created a blueprint that has dominated global charts for over a decade.</p>
+                    <p>With more Billboard Hot 100 entries than any other soloist in history, Drake's influence on pop culture is unparalleled. He doesn't just follow trends—he defines them, making him the undisputed King of Pop in the digital streaming age.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Discography Section -->
+        <section id="discography">
+            <h2 class="section-title">Classic Catalog</h2>
+            <div class="albums">
+                <div class="album-item">
+                    <div class="album-art" style="background: linear-gradient(135deg, #1e3c72, #2a5298);">
+                        <span>TC</span>
+                    </div>
+                    <div class="album-info">
+                        <h4>Take Care</h4>
+                        <p>2011 • MULTI-PLATINUM</p>
+                    </div>
+                </div>
+                <div class="album-item">
+                    <div class="album-art" style="background: linear-gradient(135deg, #000000, #434343);">
+                        <span>NWTS</span>
+                    </div>
+                    <div class="album-info">
+                        <h4>Nothing Was The Same</h4>
+                        <p>2013 • MULTI-PLATINUM</p>
+                    </div>
+                </div>
+                <div class="album-item">
+                    <div class="album-art" style="background: linear-gradient(135deg, #e6e6e6, #ffffff);">
+                        <span style="color: #333; opacity: 1;">VIEWS</span>
+                    </div>
+                    <div class="album-info">
+                        <h4>Views</h4>
+                        <p>2016 • DIAMOND</p>
+                    </div>
+                </div>
+                <div class="album-item">
+                    <div class="album-art" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <span>CLB</span>
+                    </div>
+                    <div class="album-info">
+                        <h4>Certified Lover Boy</h4>
+                        <p>2021 • CHART TOPPER</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="social-links">
+            <a href="#">Instagram</a>
+            <a href="#">Spotify</a>
+            <a href="#">Apple Music</a>
+            <a href="#">Twitter</a>
+        </div>
+        <p class="copyright">&copy; 2023 Drake Official Fan Experience. Designed for the 6ix.</p>
+    </footer>
+
+</body>
+</html>

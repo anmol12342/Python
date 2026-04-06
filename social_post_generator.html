@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Social Post Generator</title>
+  <style>
+    :root {
+      --bg: #f5efe7;
+      --panel: rgba(255, 251, 245, 0.94);
+      --text: #1d2a38;
+      --muted: #667482;
+      --accent: #d96c3f;
+      --accent-dark: #b6502a;
+      --teal: #2c7a7b;
+      --border: rgba(29, 42, 56, 0.12);
+      --shadow: 0 18px 40px rgba(31, 40, 54, 0.12);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(217,108,63,0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(44,122,123,0.14), transparent 24%),
+        linear-gradient(135deg, #f8f1e8 0%, #efe5d9 46%, #f9f4ec 100%);
+      padding: 24px;
+    }
+
+    .app {
+      max-width: 1360px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      padding: 22px;
+    }
+
+    .topbar,
+    .hero,
+    .composer,
+    .preview-grid,
+    .meta-grid,
+    .image-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .topbar {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+
+    .links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn,
+    .primary-btn,
+    .ghost-btn,
+    .quick-btn {
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      font: inherit;
+      transition: transform 0.18s ease, background 0.18s ease;
+    }
+
+    .nav-btn:hover,
+    .primary-btn:hover,
+    .ghost-btn:hover,
+    .quick-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .nav-btn,
+    .ghost-btn,
+    .quick-btn {
+      color: var(--teal);
+      background: rgba(44, 122, 123, 0.08);
+      border: 1px solid rgba(44, 122, 123, 0.16);
+    }
+
+    .primary-btn {
+      color: white;
+      background: linear-gradient(135deg, var(--accent) 0%, #ef8c62 100%);
+      font-weight: 700;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.74rem;
+      color: var(--accent-dark);
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    h1, h2, h3 { margin: 0; }
+
+    .hero {
+      grid-template-columns: 1.15fr 0.85fr;
+      align-items: stretch;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 4.8vw, 3.8rem);
+      line-height: 0.98;
+      max-width: 13ch;
+      margin-bottom: 14px;
+    }
+
+    .hero p,
+    .muted {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .meta-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 16px;
+    }
+
+    .meta-card,
+    .guide-card,
+    .post-card,
+    .image-card,
+    .html-card {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .meta-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-bottom: 6px;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .guide-card {
+      background: linear-gradient(135deg, rgba(217,108,63,0.1), rgba(255,255,255,0.84));
+    }
+
+    .guide-card ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .composer {
+      grid-template-columns: 1.4fr 1fr 1fr auto;
+      align-items: center;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font: inherit;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.9);
+      outline: none;
+    }
+
+    .quick-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .status-line {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-family: "Trebuchet MS", sans-serif;
+      margin-top: 12px;
+    }
+
+    .preview-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .post-card h3,
+    .html-card h3 {
+      margin-bottom: 10px;
+    }
+
+    .post-card p {
+      line-height: 1.7;
+      margin: 0;
+      white-space: pre-wrap;
+    }
+
+    .hashtags {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .copy-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .copy-btn {
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font: inherit;
+      background: rgba(29, 42, 56, 0.08);
+      color: var(--text);
+      transition: transform 0.18s ease, background 0.18s ease;
+    }
+
+    .copy-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(29, 42, 56, 0.16);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(44, 122, 123, 0.1);
+      color: var(--teal);
+      font-size: 0.88rem;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .image-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .image-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .image-box {
+      min-height: 180px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(29, 42, 56, 0.08);
+      background: #f3f0ea;
+    }
+
+    .image-box img {
+      width: 100%;
+      height: 100%;
+      min-height: 180px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .image-caption {
+      margin-top: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .image-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .html-output {
+      background: #1c2430;
+      color: #ffd7c5;
+      border-radius: 18px;
+      padding: 16px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 220px;
+      max-height: 520px;
+      overflow: auto;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 1080px) {
+      .topbar,
+      .hero,
+      .composer,
+      .preview-grid,
+      .meta-grid,
+      .image-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="panel topbar">
+      <div>
+        <p class="eyebrow">Separate Page</p>
+        <h2>Social Post Generator</h2>
+      </div>
+      <div class="links">
+        <a class="nav-btn" href="/">Landing Page</a>
+        <a class="nav-btn" href="/app">Mongo Agent</a>
+        <a class="nav-btn" href="/rag">PDF RAG Lab</a>
+        <a class="nav-btn" href="/excel-agent">Excel Agent</a>
+        <a class="nav-btn" href="/gemini-api-test">Gemini API Test</a>
+      </div>
+    </section>
+
+    <section class="panel hero">
+      <div>
+        <p class="eyebrow">Content Generator</p>
+        <h1>Turn a topic into a social-media-ready HTML post.</h1>
+        <p>
+          Enter a topic and this page creates a polished content package you can adapt for LinkedIn or Facebook.
+          It generates platform-specific copy, image ideas, hashtags, and an HTML preview block you can reuse.
+        </p>
+        <div class="meta-grid">
+          <div class="meta-card">
+            <span>Platforms</span>
+            <strong>LinkedIn + Facebook</strong>
+          </div>
+          <div class="meta-card">
+            <span>Includes</span>
+            <strong>Copy, hashtags, image ideas</strong>
+          </div>
+          <div class="meta-card">
+            <span>Output</span>
+            <strong>Rendered + HTML format</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <h3>What this page generates</h3>
+        <ul>
+          <li>A strong title and short summary for the topic.</li>
+          <li>A professional LinkedIn version and a friendlier Facebook version.</li>
+          <li>Relevant hashtags for posting.</li>
+          <li>Image concepts you can design or source separately.</li>
+          <li>An HTML post block you can reuse as a base template.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="composer">
+        <input id="topicInput" type="text" value="How AI is changing customer support in small businesses" />
+        <input id="audienceInput" type="text" value="startup founders, marketers, and operations teams" />
+        <input id="toneInput" type="text" value="professional, useful, and engaging" />
+        <button class="primary-btn" onclick="generatePost()">Generate</button>
+      </div>
+      <div class="quick-row">
+        <button class="quick-btn" onclick="useTopic('How AI is changing customer support in small businesses')">AI support</button>
+        <button class="quick-btn" onclick="useTopic('Why data storytelling matters for business teams')">Data storytelling</button>
+        <button class="quick-btn" onclick="useTopic('Benefits of remote work for modern teams')">Remote work</button>
+        <button class="quick-btn" onclick="useTopic('Beginner guide to personal branding on LinkedIn')">Personal branding</button>
+      </div>
+      <div id="statusText" class="status-line">Ready to generate your post package.</div>
+    </section>
+
+    <section class="preview-grid">
+      <section class="panel">
+        <div class="post-card">
+          <p class="eyebrow">LinkedIn Format</p>
+          <h3 id="titleDisplay">Generated title will appear here</h3>
+          <p id="linkedinDisplay">The LinkedIn version will appear here after generation.</p>
+          <div id="hashtagDisplay" class="hashtags"></div>
+          <div class="copy-row">
+            <button class="copy-btn" onclick="copyPostText('linkedin')">Copy LinkedIn Text</button>
+            <button class="copy-btn" onclick="copyHashtags()">Copy Hashtags</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="post-card">
+          <p class="eyebrow">Facebook Format</p>
+          <h3>Facebook post copy</h3>
+          <p id="facebookDisplay">The Facebook version will appear here after generation.</p>
+          <div class="copy-row">
+            <button class="copy-btn" onclick="copyPostText('facebook')">Copy Facebook Text</button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="panel">
+      <p class="eyebrow">Image Concepts</p>
+      <div id="imageIdeasDisplay" class="image-grid">
+        <div class="image-card">
+          <strong>Image Idea 1</strong>
+          <div class="image-box"></div>
+          <div class="image-caption">Image directions will appear here.</div>
+          <div class="image-actions">
+            <button class="copy-btn" onclick="copyImage(0)">Copy Image 1</button>
+            <button class="copy-btn" onclick="downloadImage(0)">Download Image 1</button>
+          </div>
+        </div>
+        <div class="image-card">
+          <strong>Image Idea 2</strong>
+          <div class="image-box"></div>
+          <div class="image-caption">Image directions will appear here.</div>
+          <div class="image-actions">
+            <button class="copy-btn" onclick="copyImage(1)">Copy Image 2</button>
+            <button class="copy-btn" onclick="downloadImage(1)">Download Image 2</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="html-card">
+        <p class="eyebrow">HTML Preview</p>
+        <h3>Reusable HTML post block</h3>
+        <div id="htmlDisplay" class="html-output">The generated HTML post block will appear here.</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function useTopic(topic) {
+      document.getElementById("topicInput").value = topic;
+      document.getElementById("topicInput").focus();
+    }
+
+    async function generatePost() {
+      const topic = document.getElementById("topicInput").value.trim();
+      const audience = document.getElementById("audienceInput").value.trim();
+      const tone = document.getElementById("toneInput").value.trim();
+
+      if (!topic) {
+        document.getElementById("statusText").textContent = "Enter a topic first.";
+        return;
+      }
+
+      document.getElementById("statusText").textContent = "Generating social post package...";
+      document.getElementById("linkedinDisplay").textContent = "Creating LinkedIn copy...";
+      document.getElementById("facebookDisplay").textContent = "Creating Facebook copy...";
+      document.getElementById("htmlDisplay").textContent = "Building HTML preview...";
+
+      try {
+        const response = await fetch("/social-post-generator/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topic, audience, tone })
+        });
+        const data = await response.json();
+
+        document.getElementById("statusText").textContent = "Social post package generated successfully.";
+        document.getElementById("titleDisplay").textContent = data.title;
+        document.getElementById("linkedinDisplay").textContent = data.linkedin_post;
+        document.getElementById("facebookDisplay").textContent = data.facebook_post;
+        document.getElementById("htmlDisplay").textContent = data.html_preview;
+
+        const hashtagDisplay = document.getElementById("hashtagDisplay");
+        hashtagDisplay.innerHTML = (data.hashtags || []).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
+
+        const imageIdeas = data.image_ideas || [];
+        document.getElementById("imageIdeasDisplay").innerHTML = imageIdeas.map((idea, index) => `
+          <div class="image-card">
+            <strong>Image Idea ${index + 1}</strong>
+            <div class="image-box">
+              <img src="${createPreviewImage(data.title, idea, index)}" alt="${escapeHtml(idea)}" />
+            </div>
+            <div class="image-caption">${escapeHtml(idea)}</div>
+            <div class="image-actions">
+              <button class="copy-btn" onclick="copyImage(${index})">Copy Image ${index + 1}</button>
+              <button class="copy-btn" onclick="downloadImage(${index})">Download Image ${index + 1}</button>
+            </div>
+          </div>
+        `).join("");
+      } catch (error) {
+        console.error(error);
+        document.getElementById("statusText").textContent = "Could not generate the social post package.";
+      }
+    }
+
+    async function copyPostText(platform) {
+      const title = document.getElementById("titleDisplay").textContent || "";
+      const linkedin = document.getElementById("linkedinDisplay").textContent || "";
+      const facebook = document.getElementById("facebookDisplay").textContent || "";
+      const hashtags = Array.from(document.querySelectorAll("#hashtagDisplay .tag"))
+        .map((tag) => tag.textContent)
+        .join(" ");
+
+      const body = platform === "linkedin" ? linkedin : facebook;
+      const content = [title, body, hashtags].filter(Boolean).join("\n\n");
+
+      try {
+        await navigator.clipboard.writeText(content);
+        document.getElementById("statusText").textContent = `Copied ${platform} text to clipboard.`;
+      } catch (error) {
+        console.error(error);
+        document.getElementById("statusText").textContent = "Clipboard copy failed. Your browser may not allow it on this page.";
+      }
+    }
+
+    async function copyHashtags() {
+      const hashtags = Array.from(document.querySelectorAll("#hashtagDisplay .tag"))
+        .map((tag) => tag.textContent)
+        .join(" ");
+      if (!hashtags) {
+        document.getElementById("statusText").textContent = "No hashtags to copy yet.";
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(hashtags);
+        document.getElementById("statusText").textContent = "Copied hashtags to clipboard.";
+      } catch (error) {
+        console.error(error);
+        document.getElementById("statusText").textContent = "Clipboard copy failed for hashtags.";
+      }
+    }
+
+    function getImageElement(index) {
+      const images = document.querySelectorAll("#imageIdeasDisplay img");
+      return images[index] || null;
+    }
+
+    async function copyImage(index) {
+      const img = getImageElement(index);
+      if (!img) {
+        document.getElementById("statusText").textContent = "No image available to copy yet.";
+        return;
+      }
+
+      try {
+        const blob = await imageToBlob(img);
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        document.getElementById("statusText").textContent = `Copied Image ${index + 1} to clipboard.`;
+      } catch (error) {
+        console.error(error);
+        document.getElementById("statusText").textContent = "Copy image failed. Your browser may block image clipboard access.";
+      }
+    }
+
+    async function downloadImage(index) {
+      const img = getImageElement(index);
+      if (!img) {
+        document.getElementById("statusText").textContent = "No image available to download yet.";
+        return;
+      }
+
+      try {
+        const blob = await imageToBlob(img);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `social_post_image_${index + 1}.png`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        document.getElementById("statusText").textContent = `Downloaded Image ${index + 1}.`;
+      } catch (error) {
+        console.error(error);
+        document.getElementById("statusText").textContent = "Image download failed.";
+      }
+    }
+
+    async function imageToBlob(img) {
+      const svgData = decodeURIComponent(img.src.split(",")[1] || "");
+      const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+      const url = URL.createObjectURL(svgBlob);
+
+      return new Promise((resolve, reject) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 1200;
+        canvas.height = 630;
+        const ctx = canvas.getContext("2d");
+        const image = new Image();
+        image.onload = () => {
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error("Failed to convert image."));
+          }, "image/png");
+        };
+        image.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error("Image loading failed."));
+        };
+        image.src = url;
+      });
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function createPreviewImage(title, idea, index) {
+      const palettes = [
+        { start: "#d96c3f", end: "#f3ad72", accent: "#ffffff" },
+        { start: "#2c7a7b", end: "#7ec8c3", accent: "#ffffff" },
+        { start: "#1d2a38", end: "#637381", accent: "#f9efe5" },
+        { start: "#7e5fc7", end: "#d1b4ff", accent: "#ffffff" }
+      ];
+
+      const palette = palettes[index % palettes.length];
+      const safeTitle = escapeSvgText(title || "Social Post");
+      const safeIdea = escapeSvgText(idea || "Image concept");
+      const shortIdea = safeIdea.length > 92 ? `${safeIdea.slice(0, 89)}...` : safeIdea;
+
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+          <defs>
+            <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="${palette.start}" />
+              <stop offset="100%" stop-color="${palette.end}" />
+            </linearGradient>
+            <linearGradient id="overlay" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.00)" />
+              <stop offset="100%" stop-color="rgba(0,0,0,0.28)" />
+            </linearGradient>
+          </defs>
+          <rect width="1200" height="630" rx="36" fill="url(#bg)" />
+          <circle cx="1050" cy="120" r="180" fill="rgba(255,255,255,0.10)" />
+          <circle cx="180" cy="520" r="220" fill="rgba(255,255,255,0.08)" />
+          <rect x="54" y="54" width="1092" height="522" rx="28" fill="rgba(17,24,39,0.12)" stroke="rgba(255,255,255,0.24)" />
+          <text x="88" y="118" fill="${palette.accent}" font-family="Georgia, serif" font-size="28" letter-spacing="4">SOCIAL POST VISUAL</text>
+          <text x="88" y="240" fill="${palette.accent}" font-family="Georgia, serif" font-size="62" font-weight="700">${wrapSvgLine(safeTitle, 22, 0)}</text>
+          <text x="88" y="320" fill="${palette.accent}" font-family="Georgia, serif" font-size="62" font-weight="700">${wrapSvgLine(safeTitle, 22, 1)}</text>
+          <rect x="88" y="388" width="720" height="2" fill="rgba(255,255,255,0.28)" />
+          <text x="88" y="438" fill="${palette.accent}" font-family="'Trebuchet MS', sans-serif" font-size="28">${shortIdea}</text>
+          <text x="88" y="540" fill="${palette.accent}" font-family="'Trebuchet MS', sans-serif" font-size="24">LinkedIn • Facebook • Generated Preview</text>
+        </svg>
+      `;
+
+      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+    }
+
+    function escapeSvgText(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+    }
+
+    function wrapSvgLine(text, maxWords, lineIndex) {
+      const words = String(text).split(/\s+/);
+      const lines = [];
+      let current = [];
+
+      words.forEach((word) => {
+        if ((current.join(" ") + " " + word).trim().length > maxWords && current.length) {
+          lines.push(current.join(" "));
+          current = [word];
+        } else {
+          current.push(word);
+        }
+      });
+
+      if (current.length) lines.push(current.join(" "));
+      return lines[lineIndex] || "";
+    }
+  </script>
+</body>
+</html>

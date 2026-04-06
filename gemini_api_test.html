@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gemini HTTPS API Test</title>
+  <style>
+    :root {
+      --bg: #f3efe6;
+      --panel: rgba(255, 251, 245, 0.93);
+      --panel-strong: #fffaf4;
+      --text: #1b2735;
+      --muted: #667482;
+      --accent: #d96c3f;
+      --accent-dark: #b6502a;
+      --teal: #2c7a7b;
+      --line: rgba(27, 39, 53, 0.12);
+      --shadow: 0 18px 40px rgba(31, 40, 54, 0.12);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(217,108,63,0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(44,122,123,0.14), transparent 24%),
+        linear-gradient(135deg, #f8f1e8 0%, #eee4d8 46%, #f9f4ec 100%);
+      padding: 24px;
+    }
+
+    .app {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      padding: 22px;
+    }
+
+    .topbar,
+    .hero,
+    .main-grid,
+    .toolbar,
+    .meta-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .topbar {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+
+    .links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn,
+    .primary-btn,
+    .ghost-btn,
+    .quick-btn {
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      font: inherit;
+      transition: transform 0.18s ease, background 0.18s ease;
+    }
+
+    .nav-btn:hover,
+    .primary-btn:hover,
+    .ghost-btn:hover,
+    .quick-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .nav-btn,
+    .ghost-btn,
+    .quick-btn {
+      color: var(--teal);
+      background: rgba(44, 122, 123, 0.08);
+      border: 1px solid rgba(44, 122, 123, 0.16);
+    }
+
+    .primary-btn {
+      color: white;
+      background: linear-gradient(135deg, var(--accent) 0%, #ef8c62 100%);
+      font-weight: 700;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.74rem;
+      color: var(--accent-dark);
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    h1, h2, h3 { margin: 0; }
+
+    .hero {
+      grid-template-columns: 1.15fr 0.85fr;
+      align-items: stretch;
+    }
+
+    .hero p,
+    .muted {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 4.8vw, 3.8rem);
+      line-height: 0.98;
+      max-width: 13ch;
+      margin-bottom: 14px;
+    }
+
+    .meta-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 16px;
+    }
+
+    .meta-card {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .meta-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-bottom: 6px;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .guide-card {
+      background: linear-gradient(135deg, rgba(217,108,63,0.1), rgba(255,255,255,0.84));
+      border: 1px solid rgba(217,108,63,0.16);
+      border-radius: 20px;
+      padding: 18px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .guide-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .toolbar {
+      grid-template-columns: 1fr 1fr auto;
+      align-items: center;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font: inherit;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.9);
+      outline: none;
+    }
+
+    .quick-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .main-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .nlp-card {
+      background: linear-gradient(135deg, rgba(217,108,63,0.09), rgba(255,255,255,0.84));
+      border: 1px solid rgba(217,108,63,0.16);
+      border-radius: 20px;
+      padding: 18px;
+      min-height: 220px;
+      line-height: 1.7;
+    }
+
+    .mono-box {
+      background: #1c2430;
+      color: #ffd7c5;
+      border-radius: 18px;
+      padding: 16px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 260px;
+      max-height: 520px;
+      overflow: auto;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.92rem;
+    }
+
+    .status-line {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-family: "Trebuchet MS", sans-serif;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 1080px) {
+      .topbar,
+      .hero,
+      .toolbar,
+      .main-grid,
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="panel topbar">
+      <div>
+        <p class="eyebrow">Separate Page</p>
+        <h2>Gemini HTTPS API Test</h2>
+      </div>
+      <div class="links">
+        <a class="nav-btn" href="/">Landing Page</a>
+        <a class="nav-btn" href="/app">Mongo Agent</a>
+        <a class="nav-btn" href="/rag">PDF RAG Lab</a>
+        <a class="nav-btn" href="/excel-agent">Excel Agent</a>
+        <a class="nav-btn" href="/social-post-generator">Social Post Generator</a>
+      </div>
+    </section>
+
+    <section class="panel hero">
+      <div>
+        <p class="eyebrow">Gemini + HTTPS Check</p>
+        <h1>Run a sample HTTPS API call and let Gemini explain it.</h1>
+        <p>
+          This page tests two things together: whether an outbound HTTPS API call succeeds,
+          and whether Gemini can summarize the returned payload in natural language.
+        </p>
+        <div class="meta-grid">
+          <div class="meta-card">
+            <span>Default API</span>
+            <strong>JSONPlaceholder Todo</strong>
+          </div>
+          <div class="meta-card">
+            <span>Purpose</span>
+            <strong>Connectivity + Gemini</strong>
+          </div>
+          <div class="meta-card">
+            <span>Result</span>
+            <strong>Raw + NLP view</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <h3>What this test proves</h3>
+        <ul>
+          <li>The backend can make an HTTPS request to a sample API.</li>
+          <li>The returned payload can be parsed and shown in the UI.</li>
+          <li>Gemini can read that payload and explain it in plain language.</li>
+          <li>If something fails, you can see whether it is the network call or the Gemini step.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <input id="apiUrlInput" type="text" value="https://jsonplaceholder.typicode.com/todos/1" />
+        <input id="promptInput" type="text" value="Explain whether this API response looks correct and summarize the returned JSON." />
+        <button class="primary-btn" onclick="runApiTest()">Run Test</button>
+      </div>
+      <div class="quick-row">
+        <button class="quick-btn" onclick="useApi('https://jsonplaceholder.typicode.com/todos/1')">Todo sample</button>
+        <button class="quick-btn" onclick="useApi('https://api.github.com')">GitHub root</button>
+        <button class="quick-btn" onclick="useApi('https://httpbin.org/get')">httpbin GET</button>
+      </div>
+      <div id="statusText" class="status-line">Ready to run the HTTPS + Gemini test.</div>
+    </section>
+
+    <section class="main-grid">
+      <section class="panel">
+        <p class="eyebrow">NLP Result</p>
+        <h3>Gemini explanation</h3>
+        <div id="nlpDisplay" class="nlp-card">Gemini's natural-language validation will appear here after the test runs.</div>
+      </section>
+
+      <section class="panel">
+        <p class="eyebrow">Raw Response</p>
+        <h3>HTTPS API payload</h3>
+        <div id="rawDisplay" class="mono-box">The raw API response will appear here.</div>
+      </section>
+    </section>
+  </div>
+
+  <script>
+    function useApi(url) {
+      document.getElementById("apiUrlInput").value = url;
+    }
+
+    async function runApiTest() {
+      const apiUrl = document.getElementById("apiUrlInput").value.trim();
+      const prompt = document.getElementById("promptInput").value.trim();
+      const statusText = document.getElementById("statusText");
+      const nlpDisplay = document.getElementById("nlpDisplay");
+      const rawDisplay = document.getElementById("rawDisplay");
+
+      statusText.textContent = "Running HTTPS request and asking Gemini to summarize the result...";
+      nlpDisplay.textContent = "Waiting for Gemini...";
+      rawDisplay.textContent = "Fetching raw API response...";
+
+      try {
+        const response = await fetch("/gemini-api-test/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ api_url: apiUrl, prompt })
+        });
+        const data = await response.json();
+
+        if (data.error) {
+          statusText.textContent = "The test failed.";
+          nlpDisplay.textContent = "No NLP result was generated because the backend reported an error.";
+          rawDisplay.textContent = data.error;
+          return;
+        }
+
+        statusText.textContent = `Test completed. HTTP status: ${data.status_code}.`;
+        nlpDisplay.textContent = data.nlp_result || "Gemini did not return a summary.";
+        rawDisplay.textContent = JSON.stringify(data.raw_response, null, 2) || data.raw_text || "No response body returned.";
+      } catch (error) {
+        console.error(error);
+        statusText.textContent = "The test request could not reach the backend.";
+        nlpDisplay.textContent = "No NLP result available.";
+        rawDisplay.textContent = String(error);
+      }
+    }
+  </script>
+</body>
+</html>

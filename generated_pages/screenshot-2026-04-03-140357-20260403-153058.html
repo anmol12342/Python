@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darshan Academy Clone</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header / Navbar */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 5%;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            align-items: center;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #444;
+            font-size: 15px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        nav ul li a:hover {
+            color: #9e2327;
+        }
+
+        .dropdown-icon::after {
+            content: '▼';
+            font-size: 8px;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .social-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .instagram { background-color: #b576ad; }
+        .facebook { background-color: #4c69ba; }
+        .youtube { background-color: #e52d27; }
+
+        .pay-fee-btn {
+            background-color: #66ab63;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .pay-fee-btn:hover {
+            background-color: #559152;
+        }
+
+        /* Banner Bar */
+        .color-bars {
+            display: flex;
+            height: 45px;
+            width: 100%;
+        }
+
+        .bar-red-long {
+            background-color: #9e2327;
+            flex: 3;
+        }
+
+        .bar-yellow {
+            background-color: #eec22a;
+            flex: 1;
+        }
+
+        .bar-red-short {
+            background-color: #9e2327;
+            width: 50px;
+        }
+
+        /* Main Content Grid */
+        .main-container {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            max-width: 100%;
+            margin: 0;
+        }
+
+        .content-area {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            padding: 40px 2% 40px 5%;
+            gap: 30px;
+        }
+
+        .card {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-img {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            background-color: #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            font-size: 12px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Placeholder Gradients for Images */
+        .img-1 { background: linear-gradient(135deg, #a8c0ff, #3f2b96); }
+        .img-2 { background: linear-gradient(135deg, #ff9a9e, #fad0c4); }
+        .img-3 { background: linear-gradient(135deg, #84fab0, #8fd3f4); }
+
+        .card h2 {
+            font-size: 18px;
+            color: #000;
+            margin-bottom: 15px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.3;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .read-more {
+            color: #7a98e8;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-top: auto;
+        }
+
+        .read-more:hover {
+            text-decoration: underline;
+        }
+
+        /* Sidebar / Events */
+        .sidebar {
+            background-color: #f1f1f1;
+            padding: 40px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sidebar h2 {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #000;
+        }
+
+        .sidebar .subtitle {
+            font-size: 12px;
+            color: #7a98e8;
+            letter-spacing: 1.5px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        .event-btn {
+            background-color: #25c4d6;
+            color: white;
+            width: 100%;
+            max-width: 200px;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .event-btn:hover {
+            background-color: #1eaebf;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .content-area {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            .color-bars .bar-yellow {
+                display: none;
+            }
+            .bar-red-long {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .content-area {
+                grid-template-columns: 1fr;
+                padding: 40px 10%;
+            }
+            .sidebar {
+                padding: 40px 10%;
+            }
+        }
+    </style>
+</head>
+<body>
+<section style="max-width: 1200px; margin: 24px auto; padding: 0 24px;">
+      <img onerror="this.onerror=null;this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%221200%22%20height%3D%22800%22%20viewBox%3D%220%200%201200%20800%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23f5efe6%22/%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%2250%25%22%20stop-color%3D%22%23e4edf2%22/%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23f7f9fc%22/%3E%0A%20%20%20%20%20%20%20%20%3C/linearGradient%3E%0A%20%20%20%20%20%20%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%221200%22%20height%3D%22800%22%20fill%3D%22url%28%23bg%29%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22220%22%20cy%3D%22180%22%20r%3D%22120%22%20fill%3D%22%23d8643b%22%20opacity%3D%220.18%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22980%22%20cy%3D%22220%22%20r%3D%22160%22%20fill%3D%22%231f6f73%22%20opacity%3D%220.16%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%22180%22%20y%3D%22220%22%20width%3D%22840%22%20height%3D%22360%22%20rx%3D%2232%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.88%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22600%22%20y%3D%22360%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2254%22%20font-weight%3D%22700%22%20fill%3D%22%2317202b%22%3EUploaded%20screenshot%20reference%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22600%22%20y%3D%22430%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2226%22%20fill%3D%22%235e6a76%22%3EGenerated%20placeholder%20image%3C/text%3E%0A%20%20%20%20%3C/svg%3E';this.style.objectFit='cover';this.style.background='#f7f4ee';"
+        src="/image-to-html/assets/screenshot-2026-04-03-140357-20260403-153058.png"
+        alt="Uploaded screenshot reference"
+        style="display: block; width: 100%; max-height: 520px; object-fit: cover; border-radius: 24px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);"
+      />
+    </section>
+
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#" class="dropdown-icon">Organisation</a></li>
+                <li><a href="#" class="dropdown-icon">School Info</a></li>
+                <li><a href="#" class="dropdown-icon">Holistic Education</a></li>
+                <li><a href="#" class="dropdown-icon">Life at DA</a></li>
+                <li><a href="#" class="dropdown-icon">Login</a></li>
+            </ul>
+        </nav>
+        <div class="header-actions">
+            <div class="social-icons">
+                <a href="#" class="social-icon instagram" title="Instagram">i</a>
+                <a href="#" class="social-icon facebook" title="Facebook">f</a>
+                <a href="#" class="social-icon youtube" title="YouTube">y</a>
+            </div>
+            <a href="#" class="pay-fee-btn">Pay Fee Online</a>
+        </div>
+    </header>
+
+    <div class="color-bars">
+        <div class="bar-red-long"></div>
+        <div class="bar-yellow"></div>
+        <div class="bar-red-short"></div>
+    </div>
+
+    <div class="main-container">
+        <div class="content-area">
+            <!-- Card 1 -->
+            <div class="card">
+                <div class="card-img img-1" aria-label="School building photo">
+                    <span>School Infrastructure</span>
+                </div>
+                <h2>Chain of 24 Schools in India & Colombia</h2>
+                <p>Darshan Academy has branches all over India and Colombia.</p>
+                <a href="#" class="read-more">READ MORE</a>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="card">
+                <div class="card-img img-2" aria-label="Children photo">
+                    <span>Happy Students</span>
+                </div>
+                <h2>About Us?</h2>
+                <p>Darshan Education Foundation has developed a unique holistic concept for schools that helps children develop their highest potential...</p>
+                <a href="#" class="read-more">READ MORE</a>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="card">
+                <div class="card-img img-3" aria-label="Performance photo">
+                    <span>Event Celebration</span>
+                </div>
+                <h2>Celebrating 25 Years</h2>
+                <p>Embarking on the journey to spread the message of love and peace, Darshan Education Foundation is in its Silver Jubilee Year 2020.</p>
+                <a href="#" class="read-more">READ MORE</a>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <h2>Events</h2>
+            <div class="subtitle">KEEP UPDATED</div>
+            <button class="event-btn">July - September 2024</button>
+            <button class="event-btn">October - December 2024</button>
+            <button class="event-btn">January - March 2025</button>
+        </div>
+    </div>
+
+</body>
+</html>

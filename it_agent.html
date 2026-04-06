@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IT Solutions Agent</title>
+  <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
+  <style>
+    :root {
+      --bg: #eef3ef;
+      --panel: rgba(250, 253, 250, 0.92);
+      --panel-strong: #f7fbf7;
+      --text: #183027;
+      --muted: #61756c;
+      --accent: #2d7f68;
+      --accent-dark: #1f624f;
+      --gold: #c38a39;
+      --border: rgba(24, 48, 39, 0.12);
+      --shadow: 0 18px 40px rgba(24, 48, 39, 0.12);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(45, 127, 104, 0.15), transparent 26%),
+        radial-gradient(circle at top right, rgba(195, 138, 57, 0.14), transparent 24%),
+        linear-gradient(135deg, #f5f8f3 0%, #e7eee7 50%, #f7faf7 100%);
+      padding: 24px;
+    }
+
+    .app {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      padding: 22px;
+    }
+
+    .topbar,
+    .hero,
+    .main-grid,
+    .steps-grid,
+    .config-row {
+      display: grid;
+      gap: 16px;
+    }
+
+    .topbar {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+
+    .links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn,
+    .primary-btn,
+    .ghost-btn,
+    .quick-btn {
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      font: inherit;
+      transition: transform 0.18s ease, background 0.18s ease;
+    }
+
+    .nav-btn:hover,
+    .primary-btn:hover,
+    .ghost-btn:hover,
+    .quick-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .nav-btn,
+    .ghost-btn,
+    .quick-btn {
+      color: var(--accent-dark);
+      background: rgba(45, 127, 104, 0.08);
+      border: 1px solid rgba(45, 127, 104, 0.16);
+    }
+
+    .primary-btn {
+      color: white;
+      background: linear-gradient(135deg, var(--accent) 0%, #4a9a83 100%);
+      font-weight: 700;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.74rem;
+      color: var(--gold);
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    h1, h2, h3 { margin: 0; }
+
+    .hero {
+      grid-template-columns: 1.2fr 0.8fr;
+      align-items: stretch;
+    }
+
+    .hero-copy p,
+    .muted {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .hero-copy h1 {
+      font-size: clamp(2.2rem, 4.8vw, 3.8rem);
+      line-height: 0.98;
+      max-width: 12ch;
+      margin-bottom: 14px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .stat-card,
+    .step-card,
+    .guide-card {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .stat-card span,
+    .step-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-bottom: 6px;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .guide-card {
+      background: linear-gradient(135deg, rgba(45,127,104,0.1), rgba(255,255,255,0.82));
+      display: grid;
+      gap: 12px;
+    }
+
+    .guide-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .main-grid {
+      grid-template-columns: 0.9fr 1.1fr;
+    }
+
+    .config-row {
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font: inherit;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.9);
+      outline: none;
+    }
+
+    .status-box {
+      border-radius: 18px;
+      padding: 16px;
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .quick-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .chat-shell {
+      min-height: 720px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .chat-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(195, 138, 57, 0.14);
+      color: #8d6226;
+      font-size: 0.82rem;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    #webchat {
+      min-height: 620px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: white;
+    }
+
+    .steps-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .step-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    code {
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.92em;
+    }
+
+    @media (max-width: 1080px) {
+      .hero,
+      .main-grid,
+      .steps-grid,
+      .config-row,
+      .stats,
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="panel topbar">
+      <div>
+        <p class="eyebrow">Copilot Studio Integration</p>
+        <h2>IT Solutions Agent</h2>
+      </div>
+      <div class="links">
+        <a class="nav-btn" href="/">Landing Page</a>
+        <a class="nav-btn" href="/app">Mongo Agent</a>
+        <a class="nav-btn" href="/rag">PDF RAG Lab</a>
+      </div>
+    </section>
+
+    <section class="panel hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Separate Page</p>
+        <h1>Ask an IT help agent built in Copilot Studio.</h1>
+        <p>
+          This page is prepared for a Copilot Studio agent focused on IT support, troubleshooting,
+          setup guidance, account issues, device problems, software help, and internal solution recommendations.
+          Once you paste your Copilot Studio token endpoint, the embedded web chat will connect directly to your agent.
+        </p>
+        <div class="stats">
+          <div class="stat-card">
+            <span>Agent Role</span>
+            <strong>IT Solutions Support</strong>
+          </div>
+          <div class="stat-card">
+            <span>Integration</span>
+            <strong>Copilot Studio Web Chat</strong>
+          </div>
+          <div class="stat-card">
+            <span>Setup Input</span>
+            <strong>Token Endpoint</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <h3>What To Create In Copilot Studio</h3>
+        <ul>
+          <li>Name the agent something like <code>IT Solutions Agent</code>.</li>
+          <li>Give it instructions to help with passwords, VPN, printer issues, device setup, software install guidance, and escalation suggestions.</li>
+          <li>Add knowledge sources such as your IT FAQ, internal support docs, and troubleshooting pages.</li>
+          <li>Publish the agent, then open <code>Channels</code> and copy the token endpoint for your website or mobile app channel.</li>
+          <li>Paste that endpoint below or set <code>COPILOT_STUDIO_TOKEN_ENDPOINT</code> in your environment.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="main-grid">
+      <section class="panel">
+        <p class="eyebrow">Connection Setup</p>
+        <h3>Attach your Copilot Studio agent</h3>
+        <p class="muted">
+          Microsoft’s current custom website flow uses Bot Framework Web Chat plus the token endpoint copied from Copilot Studio.
+        </p>
+
+        <div class="config-row" style="margin-top:16px;">
+          <input id="tokenEndpointInput" type="text" placeholder="Paste your Copilot Studio token endpoint here" />
+          <button class="primary-btn" onclick="connectAgent()">Connect Agent</button>
+          <button class="ghost-btn" onclick="loadConfig()">Use Saved Config</button>
+        </div>
+
+        <div id="statusBox" class="status-box" style="margin-top:16px;">
+          Loading Copilot Studio configuration...
+        </div>
+
+        <div class="quick-row">
+          <button class="quick-btn" onclick="fillSuggestion('How do I reset my company password?')">Password reset</button>
+          <button class="quick-btn" onclick="fillSuggestion('My VPN is not connecting. What should I check first?')">VPN issue</button>
+          <button class="quick-btn" onclick="fillSuggestion('My printer is offline. How can I fix it?')">Printer offline</button>
+        </div>
+      </section>
+
+      <section class="panel chat-shell">
+        <div class="chat-head">
+          <div>
+            <p class="eyebrow">Embedded Agent</p>
+            <h3>Live IT support conversation</h3>
+          </div>
+          <span id="agentState" class="chip">Not connected</span>
+        </div>
+        <div id="webchat"></div>
+      </section>
+    </section>
+
+    <section class="panel">
+      <p class="eyebrow">How It Works</p>
+      <div class="steps-grid">
+        <div class="step-card">
+          <span>1. Build Agent</span>
+          <strong>Create the IT help agent in Copilot Studio</strong>
+          Use Copilot Studio to define instructions, topics, knowledge, and escalation behavior.
+        </div>
+        <div class="step-card">
+          <span>2. Publish Agent</span>
+          <strong>Copy the token endpoint</strong>
+          After publishing, open the website or mobile/custom app channel and copy the token endpoint.
+        </div>
+        <div class="step-card">
+          <span>3. Embed Agent</span>
+          <strong>Render it on this page</strong>
+          This page calls the token endpoint, gets a Direct Line token, and renders the Copilot agent in Web Chat.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let currentTokenEndpoint = "";
+
+    function setStatus(message, connected = false) {
+      document.getElementById("statusBox").textContent = message;
+      document.getElementById("agentState").textContent = connected ? "Connected" : "Not connected";
+    }
+
+    function fillSuggestion(text) {
+      const webchatRoot = document.querySelector("#webchat");
+      if (!webchatRoot || !webchatRoot.querySelector("textarea")) {
+        setStatus("The chat must be connected before sending suggested prompts.");
+        return;
+      }
+
+      const textarea = webchatRoot.querySelector("textarea");
+      textarea.value = text;
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      textarea.focus();
+    }
+
+    async function loadConfig() {
+      setStatus("Checking for a saved Copilot Studio token endpoint...");
+      try {
+        const response = await fetch("/copilot-config");
+        const data = await response.json();
+        if (data.configured) {
+          currentTokenEndpoint = data.token_endpoint;
+          document.getElementById("tokenEndpointInput").value = currentTokenEndpoint;
+          setStatus("Saved Copilot Studio configuration found. Click Connect Agent to load the IT agent.");
+        } else {
+          setStatus("No saved token endpoint found. Paste the Copilot Studio token endpoint here or set COPILOT_STUDIO_TOKEN_ENDPOINT in your environment.");
+        }
+      } catch (error) {
+        console.error(error);
+        setStatus("Could not load the saved configuration. You can still paste the token endpoint manually.");
+      }
+    }
+
+    async function connectAgent() {
+      const input = document.getElementById("tokenEndpointInput");
+      const tokenEndpoint = input.value.trim() || currentTokenEndpoint;
+
+      if (!tokenEndpoint) {
+        setStatus("Paste your Copilot Studio token endpoint first. In Copilot Studio, publish the agent and copy the endpoint from the website or mobile/custom app channel.");
+        return;
+      }
+
+      setStatus("Connecting to Copilot Studio and requesting a Direct Line token...");
+
+      try {
+        const tokenResponse = await fetch(tokenEndpoint);
+        if (!tokenResponse.ok) {
+          throw new Error(`Token endpoint returned ${tokenResponse.status}`);
+        }
+
+        const conversationInfo = await tokenResponse.json();
+        if (!conversationInfo.token) {
+          throw new Error("No token returned by Copilot Studio token endpoint.");
+        }
+
+        const styleOptions = {
+          hideUploadButton: true,
+          accent: "#2d7f68",
+          bubbleBackground: "#f5fbf8",
+          bubbleBorderRadius: 18,
+          bubbleFromUserBackground: "#2d7f68",
+          bubbleFromUserTextColor: "#ffffff",
+          botAvatarInitials: "IT",
+          userAvatarInitials: "You",
+          sendBoxBackground: "#ffffff",
+          sendBoxBorderTop: "1px solid #d5dfd9",
+          rootHeight: "100%",
+          rootWidth: "100%"
+        };
+
+        window.WebChat.renderWebChat(
+          {
+            directLine: window.WebChat.createDirectLine({ token: conversationInfo.token }),
+            locale: "en-US",
+            styleOptions
+          },
+          document.getElementById("webchat")
+        );
+
+        setStatus("Connected successfully. Your Copilot Studio IT Solutions agent is now embedded on this page.", true);
+      } catch (error) {
+        console.error(error);
+        setStatus(`Connection failed: ${error.message}. Verify the token endpoint from Copilot Studio and make sure the agent is published.`);
+      }
+    }
+
+    loadConfig();
+  </script>
+</body>
+</html>

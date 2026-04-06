@@ -220,6 +220,165 @@
       color: var(--muted);
     }
 
+    .mcp-bot-shell {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 1000;
+      display: grid;
+      justify-items: end;
+      gap: 12px;
+    }
+
+    .mcp-bot-panel {
+      width: min(400px, calc(100vw - 24px));
+      max-height: min(76vh, 720px);
+      background: rgba(255, 250, 244, 0.98);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto auto;
+      backdrop-filter: blur(14px);
+    }
+
+    .mcp-bot-panel[hidden] {
+      display: none;
+    }
+
+    .mcp-bot-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 20px 14px;
+      background: linear-gradient(135deg, rgba(228, 111, 66, 0.14), rgba(31, 111, 115, 0.12));
+      border-bottom: 1px solid rgba(23, 32, 43, 0.08);
+    }
+
+    .mcp-bot-title {
+      display: grid;
+      gap: 4px;
+    }
+
+    .mcp-bot-title strong {
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .mcp-bot-title span {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .mcp-close-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      border: 1px solid rgba(23, 32, 43, 0.08);
+      background: rgba(255, 255, 255, 0.74);
+      color: var(--ink);
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+
+    .mcp-bot-messages {
+      padding: 16px 18px;
+      overflow: auto;
+      display: grid;
+      gap: 12px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.7), rgba(250,241,232,0.84)),
+        radial-gradient(circle at top right, rgba(228,111,66,0.08), transparent 30%);
+    }
+
+    .mcp-msg {
+      max-width: 86%;
+      display: grid;
+      gap: 5px;
+    }
+
+    .mcp-msg.bot {
+      justify-self: start;
+    }
+
+    .mcp-msg.user {
+      justify-self: end;
+    }
+
+    .mcp-msg-label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .mcp-msg-bubble {
+      padding: 14px 16px;
+      border-radius: 20px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      box-shadow: 0 10px 22px rgba(28, 36, 48, 0.06);
+    }
+
+    .mcp-msg.bot .mcp-msg-bubble {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(23, 32, 43, 0.08);
+      border-bottom-left-radius: 8px;
+    }
+
+    .mcp-msg.user .mcp-msg-bubble {
+      color: white;
+      background: linear-gradient(135deg, var(--accent) 0%, #f09468 100%);
+      border-bottom-right-radius: 8px;
+    }
+
+    .mcp-bot-status {
+      min-height: 22px;
+      padding: 0 18px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .mcp-bot-composer {
+      padding: 14px 18px 18px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .mcp-bot-input {
+      width: 100%;
+      min-height: 62px;
+      max-height: 140px;
+      resize: vertical;
+      border-radius: 18px;
+      border: 1px solid rgba(23, 32, 43, 0.14);
+      padding: 14px 16px;
+      font: inherit;
+      background: white;
+      color: var(--ink);
+      outline: none;
+    }
+
+    .mcp-bot-input:focus {
+      border-color: rgba(228, 111, 66, 0.6);
+      box-shadow: 0 0 0 3px rgba(228, 111, 66, 0.12);
+    }
+
+    .success-msg {
+      color: #157347;
+    }
+
+    .error-msg {
+      color: #b42318;
+    }
+
     @media (max-width: 920px) {
       .hero {
         grid-template-columns: 1fr;
@@ -235,6 +394,21 @@
       .hero-card {
         padding: 24px;
       }
+
+      .mcp-bot-shell {
+        right: 12px;
+        bottom: 12px;
+        left: 12px;
+        justify-items: stretch;
+      }
+
+      .mcp-bot-panel {
+        width: 100%;
+      }
+
+      .mcp-bot-composer {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -249,6 +423,13 @@
 
       <div class="actions">
         <a class="primary-btn" href="/app">Open Bot</a>
+        <a class="primary-btn" href="#" id="mcpBtn">MCP Signup</a>
+        <a class="secondary-btn" href="/customer-support">Customer Support Representative</a>
+        <a class="secondary-btn" href="/rag">Open PDF RAG Lab</a>
+        <a class="secondary-btn" href="/excel-agent">Open Excel Agent</a>
+        <a class="secondary-btn" href="/gemini-api-test">Open Gemini API Test</a>
+        <a class="secondary-btn" href="/social-post-generator">Open Social Post Generator</a>
+        <a class="secondary-btn" href="/image-to-html">Open Image to HTML Agent</a>
         <a class="secondary-btn" href="/app#chartTab">Jump to Dashboard</a>
       </div>
 
@@ -292,5 +473,206 @@
       </div>
     </aside>
   </main>
+
+  <div class="mcp-bot-shell">
+    <section class="mcp-bot-panel" id="mcpBotPanel" hidden>
+      <div class="mcp-bot-header">
+        <div class="mcp-bot-title">
+          <strong>MCP Signup Bot</strong>
+          <span>I will ask for your name, email, and password one step at a time.</span>
+        </div>
+        <button class="mcp-close-btn" id="closeMcpBotBtn" type="button" aria-label="Close signup bot">x</button>
+      </div>
+
+      <div class="mcp-bot-messages" id="mcpBotMessages"></div>
+      <div class="mcp-bot-status" id="mcpBotStatus"></div>
+
+      <form class="mcp-bot-composer" id="mcpBotForm">
+        <textarea class="mcp-bot-input" id="mcpBotInput" placeholder="Type your answer here..."></textarea>
+        <button class="primary-btn" id="mcpBotSendBtn" type="submit" style="border:none; cursor:pointer;">Send</button>
+      </form>
+    </section>
+  </div>
+
+  <script>
+    const mcpBotPanel = document.getElementById('mcpBotPanel');
+    const mcpBotMessages = document.getElementById('mcpBotMessages');
+    const mcpBotStatus = document.getElementById('mcpBotStatus');
+    const mcpBotInput = document.getElementById('mcpBotInput');
+
+    const mcpSignupState = {
+      stage: 'name',
+      name: '',
+      email: '',
+      password: '',
+      completed: false
+    };
+
+    function appendMcpMessage(role, text) {
+      const wrapper = document.createElement('div');
+      wrapper.className = `mcp-msg ${role}`;
+
+      const label = document.createElement('div');
+      label.className = 'mcp-msg-label';
+      label.textContent = role === 'user' ? 'You' : 'Signup Bot';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'mcp-msg-bubble';
+      bubble.textContent = text;
+
+      wrapper.appendChild(label);
+      wrapper.appendChild(bubble);
+      mcpBotMessages.appendChild(wrapper);
+      mcpBotMessages.scrollTop = mcpBotMessages.scrollHeight;
+    }
+
+    function resetMcpSignupFlow() {
+      mcpSignupState.stage = 'name';
+      mcpSignupState.name = '';
+      mcpSignupState.email = '';
+      mcpSignupState.password = '';
+      mcpSignupState.completed = false;
+      mcpBotMessages.innerHTML = '';
+      appendMcpMessage('bot', 'Hi, I can create your MCP account. What is your full name?');
+      mcpBotStatus.textContent = 'Step 1 of 3: Name';
+      mcpBotStatus.className = 'mcp-bot-status';
+      mcpBotInput.value = '';
+      mcpBotInput.placeholder = 'Enter your full name';
+    }
+
+    function openMcpBot() {
+      mcpBotPanel.hidden = false;
+      if (!mcpBotMessages.children.length || mcpSignupState.completed) {
+        resetMcpSignupFlow();
+      }
+      mcpBotInput.focus();
+    }
+
+    function closeMcpBot() {
+      mcpBotPanel.hidden = true;
+    }
+
+    async function submitMcpBotSignup() {
+      mcpBotStatus.textContent = 'Creating your account...';
+      mcpBotStatus.className = 'mcp-bot-status';
+
+      try {
+        const res = await fetch('/mcp-signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: mcpSignupState.name,
+            email: mcpSignupState.email,
+            password: mcpSignupState.password
+          })
+        });
+
+        let data = null;
+        try {
+          data = await res.json();
+        } catch (parseError) {
+          data = { success: false, error: 'Unexpected server response.' };
+        }
+
+        appendMcpMessage('bot', data.message || data.error || 'Request completed.');
+        mcpBotStatus.textContent = data.success
+          ? 'Account created. Type anything to start another signup.'
+          : 'Signup failed. Please correct the details and try again.';
+        mcpBotStatus.className = data.success ? 'mcp-bot-status success-msg' : 'mcp-bot-status error-msg';
+
+        if (data.success) {
+          mcpSignupState.completed = true;
+          mcpSignupState.stage = 'done';
+          mcpBotInput.placeholder = 'Type restart to create another account';
+        } else {
+          mcpSignupState.stage = 'password';
+          mcpBotInput.placeholder = 'Enter a password with at least 6 characters';
+        }
+      } catch (err) {
+        appendMcpMessage('bot', 'Network error. Please try again.');
+        mcpBotStatus.textContent = 'Network error. Please try again.';
+        mcpBotStatus.className = 'mcp-bot-status error-msg';
+        mcpSignupState.stage = 'password';
+      }
+    }
+
+    async function handleMcpBotAnswer(rawValue) {
+      const value = rawValue.trim();
+      if (!value) {
+        mcpBotStatus.textContent = 'Please type a response first.';
+        mcpBotStatus.className = 'mcp-bot-status error-msg';
+        return;
+      }
+
+      if (mcpSignupState.stage === 'done') {
+        resetMcpSignupFlow();
+        return;
+      }
+
+      if (mcpSignupState.stage === 'name') {
+        appendMcpMessage('user', value);
+        mcpSignupState.name = value;
+        mcpSignupState.stage = 'email';
+        mcpBotInput.value = '';
+        mcpBotInput.placeholder = 'Enter your email address';
+        appendMcpMessage('bot', `Thanks, ${value}. What is your email address?`);
+        mcpBotStatus.textContent = 'Step 2 of 3: Email';
+        mcpBotStatus.className = 'mcp-bot-status';
+        return;
+      }
+
+      if (mcpSignupState.stage === 'email') {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(value)) {
+          mcpBotStatus.textContent = 'Please enter a valid email address.';
+          mcpBotStatus.className = 'mcp-bot-status error-msg';
+          return;
+        }
+
+        appendMcpMessage('user', value);
+        mcpSignupState.email = value;
+        mcpSignupState.stage = 'password';
+        mcpBotInput.value = '';
+        mcpBotInput.placeholder = 'Enter a password with at least 6 characters';
+        appendMcpMessage('bot', 'Great. Now send the password you want to use for your account.');
+        mcpBotStatus.textContent = 'Step 3 of 3: Password';
+        mcpBotStatus.className = 'mcp-bot-status';
+        return;
+      }
+
+      if (mcpSignupState.stage === 'password') {
+        if (value.length < 6) {
+          mcpBotStatus.textContent = 'Password must be at least 6 characters.';
+          mcpBotStatus.className = 'mcp-bot-status error-msg';
+          return;
+        }
+
+        appendMcpMessage('user', '•'.repeat(Math.min(value.length, 12)));
+        mcpSignupState.password = value;
+        mcpBotInput.value = '';
+        await submitMcpBotSignup();
+      }
+    }
+
+    document.getElementById('mcpBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      openMcpBot();
+    });
+
+    document.getElementById('closeMcpBotBtn').addEventListener('click', () => {
+      closeMcpBot();
+    });
+
+    document.getElementById('mcpBotForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      await handleMcpBotAnswer(mcpBotInput.value);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !mcpBotPanel.hidden) {
+        closeMcpBot();
+      }
+    });
+  </script>
 </body>
 </html>

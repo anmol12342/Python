@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rajat Ji | Senior Node.js Developer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #339933;
+            --primary-dark: #2b822b;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent: #64ffda;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 10%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dim);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Hero Section */
+        header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 1rem;
+            background: radial-gradient(circle at 50% 50%, rgba(51, 153, 51, 0.1) 0%, rgba(15, 23, 42, 1) 70%);
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: var(--text-dim);
+            max-width: 700px;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.3s, background 0.3s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+        }
+
+        /* Sections General */
+        section {
+            padding: 100px 10%;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .section-title span {
+            color: var(--primary);
+        }
+
+        /* Skills Grid */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .skill-card {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s;
+            text-align: center;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+        }
+
+        .skill-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        /* Projects */
+        .projects-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .project-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .project-img {
+            width: 100%;
+            height: 200px;
+            background: #2d3748;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--text-dim);
+        }
+
+        .project-content {
+            padding: 1.5rem;
+        }
+
+        .project-tags {
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            background: rgba(51, 153, 51, 0.2);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        /* Contact */
+        .contact-flex {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .contact-form {
+            width: 100%;
+            display: grid;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 10%;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-dim);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            section { padding: 60px 5%; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#" class="logo">RAJAT.js</a>
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#skills">Expertise</a>
+            <a href="#projects">Work</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <header>
+        <h1 class="hero-title">Rajat Ji</h1>
+        <p class="hero-subtitle">Architecting high-performance, scalable backend systems with Node.js. Turning complex logic into seamless digital experiences.</p>
+        <div class="hero-btns">
+            <a href="#contact" class="btn btn-primary">Hire Expert</a>
+            <a href="#projects" class="btn" style="color: var(--text-main); margin-left: 1rem;">View Projects</a>
+        </div>
+    </header>
+
+    <section id="about">
+        <h2 class="section-title">About <span>Me</span></h2>
+        <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+            <p style="font-size: 1.1rem; color: var(--text-dim);">
+                I am a passionate Node.js Developer with a deep love for building robust server-side applications. With expertise in the JavaScript ecosystem, I focus on creating asynchronous, event-driven architectures that scale. Whether it's RESTful APIs, Microservices, or Real-time systems, I deliver clean, maintainable code that drives business growth.
+            </p>
+        </div>
+    </section>
+
+    <section id="skills" style="background: rgba(255,255,255,0.02);">
+        <h2 class="section-title">Technical <span>Stack</span></h2>
+        <div class="skills-grid">
+            <div class="skill-card">
+                <span class="skill-icon">⚡</span>
+                <h3>Node.js & Express</h3>
+                <p style="color: var(--text-dim); font-size: 0.9rem; margin-top: 0.5rem;">Building the backbone of modern web apps with speed and efficiency.</p>
+            </div>
+            <div class="skill-card">
+                <span class="skill-icon">💾</span>
+                <h3>MongoDB & SQL</h3>
+                <p style="color: var(--text-dim); font-size: 0.9rem; margin-top: 0.5rem;">Schema design and database optimization for heavy data loads.</p>
+            </div>
+            <div class="skill-card">
+                <span class="skill-icon">🛰️</span>
+                <h3>Microservices</h3>
+                <p style="color: var(--text-dim); font-size: 0.9rem; margin-top: 0.5rem;">Decoupling logic into scalable, independent services.</p>
+            </div>
+            <div class="skill-card">
+                <span class="skill-icon">🔄</span>
+                <h3>Real-time Web</h3>
+                <p style="color: var(--text-dim); font-size: 0.9rem; margin-top: 0.5rem;">WebSockets and Socket.io for instant data communication.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects">
+        <h2 class="section-title">Featured <span>Projects</span></h2>
+        <div class="projects-container">
+            <!-- Project 1 -->
+            <div class="project-card">
+                <div class="project-img">API Gateway Service</div>
+                <div class="project-content">
+                    <h3>Enterprise Auth System</h3>
+                    <p style="color: var(--text-dim); font-size: 0.9rem; margin-top: 0.5rem;">A multi-tenant OAuth2 implementation for high-security applications.</p>
+                    <div class="project-tags">
+                        <span class="tag">Node.js</span>
+                        <span class="tag">Redis</span>
+                        <span class="tag">JWT</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Project 2 -->
+            <div class="project-card">
+                <div class="project-img">Real-time Engine</div>
+                <div class="project-content">
+                    <h3>Analytics Dashboard</h3>
+                    <p style="color: var(--text-dim); font-size: 0.9rem; margin-top: 0.5rem;">Processing 1M+ events per second using Node streams and Kafka.</p>
+                    <div class="project-tags">
+                        <span class="tag">Express</span>
+                        <span class="tag">Kafka</span>
+                        <span class="tag">InfluxDB</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Project 3 -->
+            <div class="project-card">
+                <div class="project-img">Ecommerce API</div>
+                <div class="project-content">
+                    <h3>Global Store Backend</h3>
+                    <p style="color: var(--text-dim); font-size: 0.9rem; margin-top: 0.5rem;">Headless commerce engine with complex inventory management.</p>
+                    <div class="project-tags">
+                        <span class="tag">Node.js</span>
+                        <span class="tag">PostgreSQL</span>
+                        <span class="tag">Docker</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="contact-flex">
+            <h2 class="section-title">Let's <span>Collaborate</span></h2>
+            <p style="color: var(--text-dim);">Have a project in mind or just want to talk about Node.js performance? My inbox is always open.</p>
+            
+            <form class="contact-form" onsubmit="event.preventDefault(); alert('Message sent successfully!');">
+                <input type="text" placeholder="Full Name" required>
+                <input type="email" placeholder="Email Address" required>
+                <textarea rows="5" placeholder="Tell me about your project..." required></textarea>
+                <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2023 Rajat Ji. Built with &hearts; using Node.js logic.</p>
+        <div style="margin-top: 1rem; font-size: 1.5rem;">
+            <a href="#" style="color: var(--text-dim); margin: 0 10px;">GitHub</a>
+            <a href="#" style="color: var(--text-dim); margin: 0 10px;">LinkedIn</a>
+            <a href="#" style="color: var(--text-dim); margin: 0 10px;">Twitter</a>
+        </div>
+    </footer>
+
+</body>
+</html>

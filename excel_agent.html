@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Excel Agent</title>
+  <style>
+    :root {
+      --bg: #eef4ef;
+      --panel: rgba(250, 253, 250, 0.92);
+      --panel-strong: #f7fbf7;
+      --text: #183027;
+      --muted: #61756c;
+      --accent: #217346;
+      --accent-dark: #145233;
+      --highlight: #c38a39;
+      --border: rgba(24, 48, 39, 0.12);
+      --shadow: 0 18px 40px rgba(24, 48, 39, 0.12);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(33, 115, 70, 0.15), transparent 26%),
+        radial-gradient(circle at top right, rgba(195, 138, 57, 0.12), transparent 24%),
+        linear-gradient(135deg, #f5f8f3 0%, #e8efea 50%, #f8fbf8 100%);
+      padding: 24px;
+    }
+
+    .app {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      padding: 22px;
+    }
+
+    .topbar,
+    .hero,
+    .main-grid,
+    .steps-grid,
+    .composer {
+      display: grid;
+      gap: 16px;
+    }
+
+    .topbar {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+
+    .links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn,
+    .primary-btn,
+    .ghost-btn,
+    .quick-btn {
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      font: inherit;
+      transition: transform 0.18s ease, background 0.18s ease;
+    }
+
+    .nav-btn:hover,
+    .primary-btn:hover,
+    .ghost-btn:hover,
+    .quick-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .nav-btn,
+    .ghost-btn,
+    .quick-btn {
+      color: var(--accent-dark);
+      background: rgba(33, 115, 70, 0.08);
+      border: 1px solid rgba(33, 115, 70, 0.16);
+    }
+
+    .primary-btn {
+      color: white;
+      background: linear-gradient(135deg, var(--accent) 0%, #3a8e5f 100%);
+      font-weight: 700;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.74rem;
+      color: var(--highlight);
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    h1, h2, h3 { margin: 0; }
+
+    .hero {
+      grid-template-columns: 1.1fr 0.9fr;
+      align-items: stretch;
+    }
+
+    .hero-copy h1 {
+      font-size: clamp(2.2rem, 4.8vw, 3.8rem);
+      line-height: 0.98;
+      max-width: 12ch;
+      margin-bottom: 14px;
+    }
+
+    .hero-copy p,
+    .muted {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .stats,
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat-card,
+    .step-card,
+    .guide-card,
+    .formula-card {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .stat-card span,
+    .step-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-bottom: 6px;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .guide-card {
+      background: linear-gradient(135deg, rgba(33,115,70,0.1), rgba(255,255,255,0.82));
+      display: grid;
+      gap: 12px;
+    }
+
+    .guide-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .main-grid {
+      grid-template-columns: 1.15fr 0.85fr;
+    }
+
+    .chat-shell {
+      min-height: 720px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .prompt-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chat-window {
+      min-height: 460px;
+      max-height: 620px;
+      overflow: auto;
+      padding: 18px;
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.8), rgba(243,249,245,0.9)),
+        radial-gradient(circle at top right, rgba(33,115,70,0.08), transparent 34%);
+      border: 1px solid var(--border);
+      display: grid;
+      gap: 14px;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 88%;
+    }
+
+    .message.user {
+      justify-self: end;
+      align-items: end;
+    }
+
+    .message.assistant,
+    .message.system {
+      justify-self: start;
+      align-items: start;
+    }
+
+    .message-label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-family: "Trebuchet MS", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .bubble {
+      border-radius: 22px;
+      padding: 14px 16px;
+      line-height: 1.65;
+      box-shadow: 0 10px 20px rgba(28, 36, 48, 0.06);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .message.user .bubble {
+      background: linear-gradient(135deg, var(--accent) 0%, #46a06d 100%);
+      color: white;
+      border-bottom-right-radius: 8px;
+    }
+
+    .message.assistant .bubble {
+      background: rgba(255, 255, 255, 0.88);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 8px;
+    }
+
+    .message.system .bubble {
+      background: rgba(33, 115, 70, 0.08);
+      color: var(--accent-dark);
+      border: 1px solid rgba(33, 115, 70, 0.14);
+    }
+
+    .composer {
+      grid-template-columns: 1fr auto;
+      align-items: end;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 108px;
+      resize: vertical;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      font: inherit;
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--text);
+      outline: none;
+    }
+
+    .status-line {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .side-stack {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .nlp-card {
+      background: linear-gradient(135deg, rgba(33,115,70,0.09), rgba(255,255,255,0.84));
+      border: 1px solid rgba(33,115,70,0.16);
+      border-radius: 20px;
+      padding: 18px;
+      min-height: 180px;
+      line-height: 1.7;
+    }
+
+    .formula-card code,
+    .sheet-box {
+      display: block;
+      background: #1f2b24;
+      color: #def0e6;
+      border-radius: 16px;
+      padding: 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.92rem;
+    }
+
+    .sheet-box {
+      min-height: 200px;
+      max-height: 320px;
+      overflow: auto;
+    }
+
+    @media (max-width: 1080px) {
+      .topbar,
+      .hero,
+      .main-grid,
+      .steps-grid,
+      .stats,
+      .composer {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="panel topbar">
+      <div>
+        <p class="eyebrow">Separate Page</p>
+        <h2>Excel Agent</h2>
+      </div>
+      <div class="links">
+        <a class="nav-btn" href="/">Landing Page</a>
+        <a class="nav-btn" href="/app">Mongo Agent</a>
+        <a class="nav-btn" href="/rag">PDF RAG Lab</a>
+        <a class="nav-btn" href="/gemini-api-test">Gemini API Test</a>
+        <a class="nav-btn" href="/social-post-generator">Social Post Generator</a>
+      </div>
+    </section>
+
+    <section class="panel hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Microsoft Excel Assistant</p>
+        <h1>Ask for formulas, analysis, and spreadsheet help.</h1>
+        <p>
+          This page is a dedicated Excel-focused agent. Ask about formulas, pivots, charts,
+          cleaning messy sheets, lookups, date logic, dashboards, conditional formatting,
+          or paste worksheet data so the agent can reason about it.
+        </p>
+        <div class="stats">
+          <div class="stat-card">
+            <span>Specialty</span>
+            <strong>Excel formulas and logic</strong>
+          </div>
+          <div class="stat-card">
+            <span>Helps With</span>
+            <strong>Lookups, pivots, charts</strong>
+          </div>
+          <div class="stat-card">
+            <span>Output</span>
+            <strong>NLP + copyable formula</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <h3>What This Excel Agent Can Do</h3>
+        <ul>
+          <li>Recommend the right Excel formula and explain why.</li>
+          <li>Help you write `XLOOKUP`, `IF`, `SUMIFS`, `COUNTIFS`, `INDEX/MATCH`, and date formulas.</li>
+          <li>Suggest pivot tables, charts, and conditional formatting logic.</li>
+          <li>Use pasted worksheet data or headers as context.</li>
+          <li>Return a natural-language answer plus a suggested formula when available.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="main-grid">
+      <section class="panel chat-shell">
+        <div>
+          <p class="eyebrow">Chatbot Experience</p>
+          <h3>Excel Agent Conversation</h3>
+        </div>
+
+        <div class="prompt-row">
+          <button class="quick-btn" onclick="usePrompt('How do I use XLOOKUP to match employee IDs from Sheet1 to Sheet2?')">XLOOKUP help</button>
+          <button class="quick-btn" onclick="usePrompt('Give me an Excel formula to categorize sales as High, Medium, or Low.')">IF formula</button>
+          <button class="quick-btn" onclick="usePrompt('What chart should I use for monthly revenue trend data?')">Chart suggestion</button>
+          <button class="quick-btn" onclick="usePrompt('How can I highlight duplicate invoice numbers in Excel?')">Conditional formatting</button>
+        </div>
+
+        <div id="chatWindow" class="chat-window">
+          <div class="message system">
+            <div class="message-label">System</div>
+            <div class="bubble">This Excel agent can explain formulas, suggest spreadsheet logic, and use pasted sheet data if you provide it below.</div>
+          </div>
+        </div>
+
+        <div class="composer">
+          <textarea id="questionInput" placeholder="Ask an Excel question...">How do I use XLOOKUP to match employee IDs from Sheet1 to Sheet2?</textarea>
+          <button class="primary-btn" onclick="askExcelAgent()">Send</button>
+        </div>
+
+        <div class="status-line" id="statusText">Ready to help with Excel questions.</div>
+      </section>
+
+      <aside class="panel side-stack">
+        <div>
+          <p class="eyebrow">Worksheet Context</p>
+          <h3>Paste sample sheet data</h3>
+          <p class="muted">Optional: paste headers, rows, or notes here so the Excel agent can tailor the answer.</p>
+        </div>
+        <textarea id="sheetDataInput" placeholder="Example:
+Sheet1 columns: EmployeeID, Name, Department
+Sheet2 columns: EmployeeID, Salary
+Need to bring Salary into Sheet1 using EmployeeID"></textarea>
+
+        <div>
+          <p class="eyebrow">NLP Result</p>
+          <h3>Natural-language answer</h3>
+          <div id="nlpDisplay" class="nlp-card">Your Excel explanation will appear here after you ask a question.</div>
+        </div>
+
+        <div class="formula-card">
+          <p class="eyebrow">Suggested Formula</p>
+          <h3>Copyable Excel formula</h3>
+          <code id="formulaDisplay">No formula suggested yet.</code>
+        </div>
+      </aside>
+    </section>
+
+    <section class="panel">
+      <p class="eyebrow">Sample Worksheet Context</p>
+      <h3>What to paste for better answers</h3>
+      <p class="muted">You can paste headers, a few rows, sheet names, or the structure of your workbook.</p>
+      <div class="sheet-box">Sheet1 columns: OrderID, Customer, Region, Revenue, Date
+Sheet2 columns: Region, Manager
+Goal: bring Manager into Sheet1 and then total revenue by manager</div>
+    </section>
+
+    <section class="panel">
+      <p class="eyebrow">How It Works</p>
+      <div class="steps-grid">
+        <div class="step-card">
+          <span>1. Ask Goal</span>
+          <strong>Describe the spreadsheet problem</strong>
+          Ask for a formula, a chart, cleanup logic, lookup behavior, or a summary.
+        </div>
+        <div class="step-card">
+          <span>2. Add Context</span>
+          <strong>Paste worksheet structure</strong>
+          Sheet names, headers, and sample rows help the agent give more accurate Excel guidance.
+        </div>
+        <div class="step-card">
+          <span>3. Get Answer</span>
+          <strong>Receive NLP output and formulas</strong>
+          The agent returns a clear explanation and extracts a copyable Excel formula when one is present.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function usePrompt(text) {
+      document.getElementById("questionInput").value = text;
+      document.getElementById("questionInput").focus();
+    }
+
+    function appendMessage(role, text) {
+      const chatWindow = document.getElementById("chatWindow");
+      const message = document.createElement("div");
+      message.className = `message ${role}`;
+
+      const label = document.createElement("div");
+      label.className = "message-label";
+      label.textContent = role === "user" ? "You" : role === "assistant" ? "Excel Agent" : "System";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = text;
+
+      message.appendChild(label);
+      message.appendChild(bubble);
+      chatWindow.appendChild(message);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    async function askExcelAgent() {
+      const question = document.getElementById("questionInput").value.trim();
+      const sheetData = document.getElementById("sheetDataInput").value.trim();
+
+      if (!question) {
+        document.getElementById("statusText").textContent = "Enter an Excel question first.";
+        return;
+      }
+
+      appendMessage("user", question);
+      appendMessage("assistant", "Thinking through the Excel logic and building a practical answer...");
+      document.getElementById("statusText").textContent = "Generating Excel guidance...";
+      document.getElementById("nlpDisplay").textContent = "Preparing the natural-language result...";
+      document.getElementById("formulaDisplay").textContent = "Checking whether a formula should be suggested...";
+
+      try {
+        const response = await fetch("/excel-agent/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question, sheet_data: sheetData })
+        });
+
+        const data = await response.json();
+        const chatWindow = document.getElementById("chatWindow");
+        const pendingAssistant = chatWindow.querySelector(".message.assistant:last-child .bubble");
+        if (pendingAssistant) {
+          pendingAssistant.textContent = data.answer;
+        } else {
+          appendMessage("assistant", data.answer);
+        }
+
+        document.getElementById("nlpDisplay").textContent = data.nlp_result || data.answer;
+        document.getElementById("formulaDisplay").textContent = data.suggested_formula || "No explicit Excel formula was detected in this answer.";
+        document.getElementById("statusText").textContent = "Excel answer generated successfully.";
+      } catch (error) {
+        console.error(error);
+        document.getElementById("statusText").textContent = "Could not reach the Excel agent endpoint.";
+        document.getElementById("nlpDisplay").textContent = "The Excel agent could not be reached right now.";
+        document.getElementById("formulaDisplay").textContent = "No formula available.";
+      }
+    }
+
+    document.getElementById("questionInput").addEventListener("keydown", (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        askExcelAgent();
+      }
+    });
+  </script>
+</body>
+</html>

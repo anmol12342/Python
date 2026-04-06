@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darshan Academy, Delhi - Home</title>
+    <style>
+        :root {
+            --primary-blue: #0056b3;
+            --secondary-red: #b32a2a;
+            --gold: #d4af37;
+            --teal: #17a2b8;
+            --light-gray: #f8f9fa;
+            --dark-gray: #333;
+            --border-color: #ddd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            line-height: 1.6;
+            color: #444;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            padding: 15px 0;
+            background: #fff;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-placeholder {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-red));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 10px;
+            text-align: center;
+            border: 2px solid var(--gold);
+        }
+
+        .school-name h1 {
+            font-size: 24px;
+            color: var(--secondary-red);
+            font-weight: bold;
+        }
+
+        .top-links {
+            display: flex;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .top-links a {
+            padding: 10px 20px;
+            font-size: 14px;
+            color: #666;
+            border-right: 1px solid var(--border-color);
+        }
+
+        /* Marquee Area */
+        .admission-bar {
+            background: linear-gradient(to right, #e0f2f1, #ffffff, #e0f2f1);
+            padding: 10px 0;
+            font-size: 13px;
+            border-top: 1px solid #cce;
+            border-bottom: 1px solid #cce;
+        }
+
+        .admission-content {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            color: var(--primary-blue);
+            font-weight: bold;
+        }
+
+        /* Hero / Carousel */
+        .hero {
+            position: relative;
+            height: 500px;
+            background: #ddd;
+            overflow: hidden;
+        }
+
+        .hero-img-placeholder {
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400"><rect width="800" height="400" fill="%23ccc"/><text x="50%" y="50%" font-family="Arial" font-size="24" fill="%23777" text-anchor="middle">Main Banner - Award Ceremony Image</text></svg>');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .hero-overlay-left {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            width: 180px;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .hero-overlay-right {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #fff;
+            padding: 20px;
+            width: 300px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .hero-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            background: rgba(255,255,255,0.7);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #999;
+            border-radius: 50%;
+        }
+
+        .dot.active {
+            background: var(--primary-blue);
+        }
+
+        .arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.8);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .arrow-left { left: 10px; }
+        .arrow-right { right: 10px; }
+
+        /* Navigation */
+        .main-nav-wrapper {
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .nav-links li a:hover {
+            color: var(--secondary-red);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .social-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .ig { background: #e1306c; }
+        .fb { background: #3b5998; }
+        .yt { background: #ff0000; }
+
+        .pay-fee-btn {
+            background: #5cb85c;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Three Columns Section */
+        .info-grid {
+            padding: 60px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .info-card {
+            text-align: left;
+        }
+
+        .card-img-placeholder {
+            width: 100%;
+            height: 180px;
+            background: #eee;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .info-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #000;
+        }
+
+        .info-card p {
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 15px;
+            height: 80px;
+            overflow: hidden;
+        }
+
+        .read-more {
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--primary-blue);
+            text-transform: uppercase;
+        }
+
+        /* Events Sidebar Style */
+        .events-box {
+            background: #eee;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .events-box h2 {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .events-box span {
+            font-size: 11px;
+            color: var(--primary-blue);
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .event-btn {
+            display: block;
+            background: #00bcd4;
+            color: #fff;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+
+        .event-btn:hover {
+            background: #0097a7;
+        }
+
+        /* Messages Section */
+        .messages-section {
+            padding: 60px 0;
+            background: #fdfdfd;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .principal-msg {
+            flex: 1;
+            min-width: 300px;
+            border: 1px solid #eee;
+            padding: 30px;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .principal-msg h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .principal-content {
+            display: flex;
+            gap: 20px;
+        }
+
+        .principal-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #ddd;
+            flex-shrink: 0;
+        }
+
+        .principal-info p {
+            font-size: 12px;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .principal-name {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .principal-name strong {
+            display: block;
+            font-size: 13px;
+        }
+
+        .video-box {
+            flex: 1;
+            min-width: 300px;
+            text-align: center;
+        }
+
+        .video-box h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .video-placeholder {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        /* Red Divider */
+        .red-divider {
+            height: 200px;
+            background: var(--secondary-red);
+            margin: 40px 0;
+        }
+
+        /* News and Testimonials */
+        .news-testimonials {
+            padding: 60px 0;
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .news-col { flex: 2; min-width: 300px; }
+        .testi-col { flex: 1; min-width: 300px; }
+
+        .section-title {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .news-card {
+            border: 1px solid #eee;
+            padding: 20px;
+            background: #fff;
+        }
+
+        .news-date {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .news-card h4 {
+            font-size: 15px;
+            margin-bottom: 15px;
+        }
+
+        .testimonial-slider {
+            border: 1px solid #eee;
+            padding: 30px;
+            position: relative;
+            background: #fff;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .testi-quote {
+            font-size: 14px;
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 10px;
+        }
+
+        .testi-author {
+            font-size: 12px;
+            color: var(--primary-blue);
+        }
+
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            left: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 5px;
+            pointer-events: none;
+        }
+
+        .slider-nav span {
+            pointer-events: auto;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        /* Footer */
+        footer {
+            background: #eee;
+            padding: 60px 0 20px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-col h4 {
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .footer-col ul li {
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: #666;
+        }
+
+        .footer-logo-desc {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .footer-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-btn {
+            border: 1px solid var(--primary-blue);
+            color: var(--primary-blue);
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .footer-contact {
+            background: #c63d3d;
+            color: #fff;
+            padding: 30px;
+            border-radius: 5px;
+        }
+
+        .footer-contact h4 { color: #fff; }
+
+        .footer-contact p, .footer-contact li {
+            color: #fff;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .copyright {
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-top { flex-direction: column; text-align: center; gap: 15px; }
+            .top-links { border: none; }
+            .top-links a { border: none; padding: 5px 10px; }
+            .nav-links { display: none; } /* Mobile menu simplified */
+            .hero { height: 300px; }
+            .hero-overlay-right { display: none; }
+            .principal-content { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container header-top">
+            <div class="logo-area">
+                <div class="logo-placeholder">DARSHAN ACADEMY</div>
+                <div class="school-name">
+                    <h1>Darshan Academy, Delhi</h1>
+                </div>
+            </div>
+            <nav class="top-links">
+                <a data-nav-id="nav-1" href="#">Our Schools</a>
+                <a data-nav-id="nav-2" href="#">Contact</a>
+                <a data-nav-id="nav-3" href="#">Alumni</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="admission-bar">
+        <div class="container admission-content">
+            <span>Admission Open (Click Here)</span>
+            <span>|</span>
+            <span>First cutoff List...</span>
+            <a data-nav-id="nav-4" href="#" style="background: var(--primary-blue); color: #fff; padding: 0 5px; border-radius: 2px;">View All</a>
+        </div>
+    </div>
+
+    <section class="hero">
+        <div class="hero-img-placeholder"></div>
+        <div class="arrow arrow-left">&lsaquo;</div>
+        <div class="arrow arrow-right">&rsaquo;</div>
+        <div class="hero-overlay-left">
+            <p style="font-size: 10px; font-weight: bold; color: var(--primary-blue);">British Council Award</p>
+        </div>
+        <div class="hero-overlay-right">
+            <p style="color: var(--primary-blue); font-size: 24px; font-weight: bold;">ADMISSIONS OPEN</p>
+            <p style="font-size: 14px; margin: 10px 0;">Register Online Today!</p>
+            <div style="background: var(--gold); padding: 5px; border-radius: 20px; font-size: 12px; font-weight: bold;">
+                🔗 apply.darshanacademy.org
+            </div>
+        </div>
+        <div class="hero-dots">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+    </section>
+
+    <div class="main-nav-wrapper">
+        <div class="container main-nav">
+            <ul class="nav-links">
+                <li><a data-nav-id="nav-5" href="#">Home</a></li>
+                <li><a data-nav-id="nav-6" href="#">Organisation &#9662;</a></li>
+                <li><a data-nav-id="nav-7" href="#">School Info &#9662;</a></li>
+                <li><a data-nav-id="nav-8" href="#">Holistic Education &#9662;</a></li>
+                <li><a data-nav-id="nav-9" href="#">Life at DA &#9662;</a></li>
+                <li><a data-nav-id="nav-10" href="#">Login &#9662;</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="social-icons">
+                    <a data-nav-id="nav-11" href="#" class="social-btn ig">In</a>
+                    <a data-nav-id="nav-12" href="#" class="social-btn fb">Fb</a>
+                    <a data-nav-id="nav-13" href="#" class="social-btn yt">Yt</a>
+                </div>
+                <a data-nav-id="nav-14" href="#" class="pay-fee-btn">Pay Fee Online</a>
+            </div>
+        </div>
+    </div>
+
+    <main class="container">
+        <section class="info-grid">
+            <div class="info-card">
+                <div class="card-img-placeholder" style="background: linear-gradient(#ccc, #bbb);">
+                    <img alt="Screenshot reference image" onerror="this.onerror=null;this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%221200%22%20height%3D%22800%22%20viewBox%3D%220%200%201200%20800%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23f5efe6%22/%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%2250%25%22%20stop-color%3D%22%23e4edf2%22/%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23f7f9fc%22/%3E%0A%20%20%20%20%20%20%20%20%3C/linearGradient%3E%0A%20%20%20%20%20%20%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%221200%22%20height%3D%22800%22%20fill%3D%22url%28%23bg%29%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22220%22%20cy%3D%22180%22%20r%3D%22120%22%20fill%3D%22%23d8643b%22%20opacity%3D%220.18%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22980%22%20cy%3D%22220%22%20r%3D%22160%22%20fill%3D%22%231f6f73%22%20opacity%3D%220.16%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%22180%22%20y%3D%22220%22%20width%3D%22840%22%20height%3D%22360%22%20rx%3D%2232%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.88%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22600%22%20y%3D%22360%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2254%22%20font-weight%3D%22700%22%20fill%3D%22%2317202b%22%3EScreenshot%20reference%20image%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22600%22%20y%3D%22430%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2226%22%20fill%3D%22%235e6a76%22%3EGenerated%20placeholder%20image%3C/text%3E%0A%20%20%20%20%3C/svg%3E';this.style.objectFit='cover';this.style.background='#f7f4ee';"/image-to-html/assets/screenshot-3-4-2026-153254-delhi-darshanacademy-org-20260403-153413.jpeg";this.style.objectFit='cover';this.style.background='#f7f4ee';" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='200'><rect width='300' height='200' fill='%239ac'/><text x='50%25' y='50%25' text-anchor='middle' fill='white'>School Building</text></svg>" alt="School Building" width="100%" height="100%">
+                </div>
+                <h3>Chain of 24 Schools in India & Colombia</h3>
+                <p>Darshan Academy has branches all over India and Colombia...</p>
+                <a data-nav-id="nav-15" href="#" class="read-more">Read More</a>
+            </div>
+            <div class="info-card">
+                <div class="card-img-placeholder">
+                    <img alt="Screenshot reference image" onerror="this.onerror=null;this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%221200%22%20height%3D%22800%22%20viewBox%3D%220%200%201200%20800%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23f5efe6%22/%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%2250%25%22%20stop-color%3D%22%23e4edf2%22/%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23f7f9fc%22/%3E%0A%20%20%20%20%20%20%20%20%3C/linearGradient%3E%0A%20%20%20%20%20%20%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%221200%22%20height%3D%22800%22%20fill%3D%22url%28%23bg%29%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22220%22%20cy%3D%22180%22%20r%3D%22120%22%20fill%3D%22%23d8643b%22%20opacity%3D%220.18%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22980%22%20cy%3D%22220%22%20r%3D%22160%22%20fill%3D%22%231f6f73%22%20opacity%3D%220.16%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%22180%22%20y%3D%22220%22%20width%3D%22840%22%20height%3D%22360%22%20rx%3D%2232%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.88%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22600%22%20y%3D%22360%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2254%22%20font-weight%3D%22700%22%20fill%3D%22%2317202b%22%3EScreenshot%20reference%20image%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22600%22%20y%3D%22430%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2226%22%20fill%3D%22%235e6a76%22%3EGenerated%20placeholder%20image%3C/text%3E%0A%20%20%20%20%3C/svg%3E';this.style.objectFit='cover';this.style.background='#f7f4ee';"/image-to-html/assets/screenshot-3-4-2026-153254-delhi-darshanacademy-org-20260403-153413.jpeg";this.style.objectFit='cover';this.style.background='#f7f4ee';" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='200'><rect width='300' height='200' fill='%23ca9'/><text x='50%25' y='50%25' text-anchor='middle' fill='white'>Students</text></svg>" alt="About Us" width="100%" height="100%">
+                </div>
+                <h3>About Us?</h3>
+                <p>Darshan Education Foundation has developed a unique holistic concept for schools...</p>
+                <a data-nav-id="nav-16" href="#" class="read-more">Read More</a>
+            </div>
+            <div class="info-card">
+                <div class="card-img-placeholder">
+                    <img alt="Screenshot reference image" onerror="this.onerror=null;this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%221200%22%20height%3D%22800%22%20viewBox%3D%220%200%201200%20800%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23f5efe6%22/%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%2250%25%22%20stop-color%3D%22%23e4edf2%22/%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23f7f9fc%22/%3E%0A%20%20%20%20%20%20%20%20%3C/linearGradient%3E%0A%20%20%20%20%20%20%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%221200%22%20height%3D%22800%22%20fill%3D%22url%28%23bg%29%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22220%22%20cy%3D%22180%22%20r%3D%22120%22%20fill%3D%22%23d8643b%22%20opacity%3D%220.18%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22980%22%20cy%3D%22220%22%20r%3D%22160%22%20fill%3D%22%231f6f73%22%20opacity%3D%220.16%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%22180%22%20y%3D%22220%22%20width%3D%22840%22%20height%3D%22360%22%20rx%3D%2232%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.88%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22600%22%20y%3D%22360%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2254%22%20font-weight%3D%22700%22%20fill%3D%22%2317202b%22%3EScreenshot%20reference%20image%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22600%22%20y%3D%22430%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2226%22%20fill%3D%22%235e6a76%22%3EGenerated%20placeholder%20image%3C/text%3E%0A%20%20%20%20%3C/svg%3E';this.style.objectFit='cover';this.style.background='#f7f4ee';"/image-to-html/assets/screenshot-3-4-2026-153254-delhi-darshanacademy-org-20260403-153413.jpeg";this.style.objectFit='cover';this.style.background='#f7f4ee';" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='200'><rect width='300' height='200' fill='%239ca'/><text x='50%25' y='50%25' text-anchor='middle' fill='white'>Celebration</text></svg>" alt="Celebrating 25 Years" width="100%" height="100%">
+                </div>
+                <h3>Celebrating 25 Years</h3>
+                <p>Embarking on the journey to spread the message of love and peace...</p>
+                <a data-nav-id="nav-17" href="#" class="read-more">Read More</a>
+            </div>
+            <div class="events-box">
+                <h2>Events</h2>
+                <span>KEEP UPDATED</span>
+                <a data-nav-id="nav-18" href="#" class="event-btn">July - September 2024</a>
+                <a data-nav-id="nav-19" href="#" class="event-btn">October - December 2024</a>
+                <a data-nav-id="nav-20" href="#" class="event-btn">January - March 2025</a>
+            </div>
+        </section>
+
+        <section class="messages-section">
+            <div class="flex-row">
+                <div class="principal-msg">
+                    <h2>Principal's Message</h2>
+                    <div class="principal-content">
+                        <div style="text-align: center;">
+                            <div class="principal-img">
+                                <img alt="Screenshot reference image" onerror="this.onerror=null;this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%221200%22%20height%3D%22800%22%20viewBox%3D%220%200%201200%20800%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23f5efe6%22/%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%2250%25%22%20stop-color%3D%22%23e4edf2%22/%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23f7f9fc%22/%3E%0A%20%20%20%20%20%20%20%20%3C/linearGradient%3E%0A%20%20%20%20%20%20%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%221200%22%20height%3D%22800%22%20fill%3D%22url%28%23bg%29%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22220%22%20cy%3D%22180%22%20r%3D%22120%22%20fill%3D%22%23d8643b%22%20opacity%3D%220.18%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22980%22%20cy%3D%22220%22%20r%3D%22160%22%20fill%3D%22%231f6f73%22%20opacity%3D%220.16%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%22180%22%20y%3D%22220%22%20width%3D%22840%22%20height%3D%22360%22%20rx%3D%2232%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.88%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22600%22%20y%3D%22360%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2254%22%20font-weight%3D%22700%22%20fill%3D%22%2317202b%22%3EScreenshot%20reference%20image%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22600%22%20y%3D%22430%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2226%22%20fill%3D%22%235e6a76%22%3EGenerated%20placeholder%20image%3C/text%3E%0A%20%20%20%20%3C/svg%3E';this.style.objectFit='cover';this.style.background='#f7f4ee';"/image-to-html/assets/screenshot-3-4-2026-153254-delhi-darshanacademy-org-20260403-153413.jpeg";this.style.objectFit='cover';this.style.background='#f7f4ee';" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><circle cx='50' cy='50' r='50' fill='%23ddd'/><text x='50%25' y='55%25' text-anchor='middle' font-size='10'>Photo</text></svg>" alt="Principal Photo">
+                            </div>
+                            <div class="principal-name">
+                                <strong>Ms. Mamta Sabharwal</strong>
+                                <small>Vice Principal</small>
+                            </div>
+                        </div>
+                        <div class="principal-info">
+                            <p>"Be Good, Do Good, Be One", Inspired by our school motto, we at Darshan Academy Delhi recognize the critical need for students to develop 21st century skills in an increasingly interconnected, diverse, global community...</p>
+                            <a data-nav-id="nav-21" href="#" class="read-more">Read More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-box">
+                    <h2>Celebrating 30 Glorious Years of Darshan Academy</h2>
+                    <div class="video-placeholder">
+                        <div style="text-align: center;">
+                            <div style="font-size: 50px; color: #ff0000;">▶️</div>
+                            <p>Watch Pearl Jubilee Video</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="red-divider"></div>
+
+    <div class="container news-testimonials">
+        <div class="news-col">
+            <h2 class="section-title">Latest news</h2>
+            <a data-nav-id="nav-22" href="#" style="font-size: 12px; color: var(--primary-blue);">ALL NEWS</a>
+            <div class="news-grid">
+                <div class="news-card">
+                    <span class="news-date">📅 March 23, 2026</span>
+                    <h4>Mass Meditation Session</h4>
+                    <a data-nav-id="nav-23" href="#" class="read-more">Read More</a>
+                </div>
+                <div class="news-card">
+                    <span class="news-date">📅 March 23, 2026</span>
+                    <h4>National Science Day Celebration</h4>
+                    <a data-nav-id="nav-24" href="#" class="read-more">Read More</a>
+                </div>
+                <div class="news-card">
+                    <span class="news-date">📅 March 23, 2026</span>
+                    <h4>World Wildlife Day Celebration</h4>
+                    <a data-nav-id="nav-25" href="#" class="read-more">Read More</a>
+                </div>
+            </div>
+        </div>
+        <div class="testi-col">
+            <h2 class="section-title">Testimonials</h2>
+            <a data-nav-id="nav-26" href="#" style="font-size: 12px; color: var(--primary-blue);">READ ALL</a>
+            <div class="testimonial-slider">
+                <div class="slider-nav">
+                    <span>&lsaquo;</span>
+                    <span>&rsaquo;</span>
+                </div>
+                <div style="font-size: 30px; color: #78909c; margin-bottom: 10px;">&ldquo;</div>
+                <p class="testi-quote">Proud to be a Darshanite</p>
+                <p class="testi-author">Vaishnavi Dhingra, XII-A</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <h4 style="color: var(--primary-blue);">Darshan Education Foundation</h4>
+                <p class="footer-logo-desc">Darshan Education Foundation has been providing students with an excellent all-round education since its inauguration of its first school, Meerut, in India, 1995.</p>
+                <div class="footer-btns">
+                    <a data-nav-id="nav-27" href="#" class="footer-btn">GET BROCHURE</a>
+                    <a data-nav-id="nav-28" href="#" class="footer-btn">NEWSLETTER</a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>OUR SCHOOL</h4>
+                <ul>
+                    <li>About us</li>
+                    <li>Our Vision</li>
+                    <li>Our Mission</li>
+                    <li>Academics</li>
+                    <li>Career</li>
+                    <li>Help us to improve our Website!</li>
+                    <li>Picture Gallery</li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>OUR LINKS</h4>
+                <ul>
+                    <li>School Calendar</li>
+                    <li>News</li>
+                    <li>Preschool</li>
+                    <li>Primary School</li>
+                    <li>Middle School</li>
+                    <li>Sr. Secondary</li>
+                    <li>Workshops</li>
+                </ul>
+            </div>
+            <div class="footer-col footer-contact">
+                <h4>DARSHAN ACADEMY, DELHI</h4>
+                <p>Kirpal Bagh, Bhama Shah Road, Sant Kirpal Singh Marg Delhi - 110009, India</p>
+                <p>📧 infodelhi@darshanacademy.org</p>
+                <p>📞 08588806008, 08588806009</p>
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <span>Fb</span> <span>Ig</span> <span>Yt</span>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2025 All Rights Reserved | Darshan Academy
+        </div>
+    </footer>
+
+</body>
+</html></html>
