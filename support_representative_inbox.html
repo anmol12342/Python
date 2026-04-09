@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support Representative Inbox</title>
+  <style>
+    :root {
+      --ink: #14202b;
+      --muted: #687782;
+      --panel: rgba(255, 255, 255, 0.86);
+      --border: rgba(20, 32, 43, 0.12);
+      --accent: #155f67;
+      --accent-2: #f06c37;
+      --shadow: 0 24px 60px rgba(20, 32, 43, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at top left, rgba(240, 108, 55, 0.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(21, 95, 103, 0.18), transparent 34%),
+        linear-gradient(135deg, #fff7ed 0%, #f3ede5 56%, #f7fbfb 100%);
+    }
+
+    .shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .topbar,
+    .command-panel,
+    .grid,
+    .panel,
+    .ticket,
+    .reply-form {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .topbar {
+      border-radius: 28px;
+      padding: 22px 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+    }
+
+    h1, h2, p { margin: 0; }
+
+    .eyebrow {
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--accent-2);
+      font-family: "Trebuchet MS", sans-serif;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    h1 { font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1; }
+
+    .muted {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+
+    .back {
+      color: white;
+      background: linear-gradient(135deg, var(--accent) 0%, #1c7b85 100%);
+      border-radius: 999px;
+      padding: 13px 18px;
+      text-decoration: none;
+      font-family: "Trebuchet MS", sans-serif;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .command-panel {
+      border-radius: 28px;
+      padding: 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 0.85fr) minmax(320px, 1.15fr);
+      gap: 16px;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .command-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 8% 20%, rgba(240, 108, 55, 0.16), transparent 28%),
+        radial-gradient(circle at 95% 20%, rgba(21, 95, 103, 0.16), transparent 26%);
+      pointer-events: none;
+    }
+
+    .command-panel > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .lookup-form {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .lookup-form input {
+      width: 100%;
+      min-height: 52px;
+      border: 1px solid rgba(20, 32, 43, 0.13);
+      border-radius: 999px;
+      padding: 0 18px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.94);
+      font: inherit;
+      outline: none;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .lookup-button,
+    .link-button {
+      min-height: 52px;
+      border: none;
+      border-radius: 999px;
+      padding: 0 18px;
+      cursor: pointer;
+      color: white;
+      background: linear-gradient(135deg, var(--accent) 0%, #1c7b85 100%);
+      font-family: "Trebuchet MS", sans-serif;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 14px 28px rgba(21, 95, 103, 0.16);
+    }
+
+    .link-button {
+      color: var(--accent);
+      border: 1px solid rgba(21, 95, 103, 0.18);
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: none;
+    }
+
+    .lookup-status {
+      margin-top: 10px;
+      color: var(--muted);
+      font-family: "Trebuchet MS", sans-serif;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .grid {
+      border-radius: 30px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      min-height: 680px;
+    }
+
+    .panel {
+      box-shadow: none;
+      border: none;
+      border-radius: 0;
+      overflow: hidden;
+    }
+
+    .tickets {
+      border-right: 1px solid var(--border);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 680px;
+    }
+
+    .panel-head {
+      padding: 18px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .inbox-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .stat-card {
+      padding: 10px 12px;
+      border: 1px solid rgba(20, 32, 43, 0.1);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.72);
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .stat-card strong {
+      display: block;
+      font-size: 1.3rem;
+      line-height: 1;
+    }
+
+    .stat-card span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .filter-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .filter-row input,
+    .filter-row select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.92);
+      font: inherit;
+      outline: none;
+    }
+
+    .ticket-list {
+      padding: 14px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      overflow: auto;
+    }
+
+    .ticket {
+      width: 100%;
+      text-align: left;
+      border-radius: 20px;
+      box-shadow: 0 12px 24px rgba(20, 32, 43, 0.08);
+      padding: 14px;
+      cursor: pointer;
+      font: inherit;
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+
+    .ticket:hover,
+    .ticket.active {
+      transform: translateY(-2px);
+      border-color: rgba(240, 108, 55, 0.46);
+    }
+
+    .ticket strong,
+    .message-label {
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .ticket span {
+      display: block;
+      color: var(--muted);
+      line-height: 1.45;
+      margin-top: 6px;
+      font-size: 0.92rem;
+    }
+
+    .ticket-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 9px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 9px;
+      border-radius: 999px;
+      color: var(--accent);
+      background: rgba(21, 95, 103, 0.1);
+      font-family: "Trebuchet MS", sans-serif;
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+    .badge.high,
+    .badge.urgent {
+      color: #b91c1c;
+      background: rgba(185, 28, 28, 0.1);
+    }
+
+    .ticket-actions,
+    .quick-replies {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .ticket-action,
+    .quick-reply,
+    .note-button {
+      min-height: 40px;
+      border-radius: 999px;
+      border: 1px solid rgba(21, 95, 103, 0.18);
+      color: var(--accent);
+      background: rgba(21, 95, 103, 0.08);
+      cursor: pointer;
+      padding: 0 13px;
+      font-family: "Trebuchet MS", sans-serif;
+      font-weight: 700;
+    }
+
+    .ticket-action.primary {
+      color: white;
+      border: none;
+      background: linear-gradient(135deg, var(--accent) 0%, #1c7b85 100%);
+    }
+
+    .chat-panel {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto auto;
+      min-height: 680px;
+    }
+
+    .order-details {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      background:
+        linear-gradient(135deg, rgba(21, 95, 103, 0.08), rgba(240, 108, 55, 0.08)),
+        rgba(255, 255, 255, 0.76);
+      display: grid;
+      gap: 12px;
+    }
+
+    .order-details[hidden] {
+      display: none;
+    }
+
+    .order-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .order-field {
+      padding: 11px 12px;
+      border: 1px solid rgba(20, 32, 43, 0.1);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.78);
+      min-width: 0;
+    }
+
+    .order-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .order-field span {
+      display: block;
+      color: var(--muted);
+      font-family: "Trebuchet MS", sans-serif;
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .order-field strong {
+      display: block;
+      line-height: 1.45;
+      word-break: break-word;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .order-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .order-action {
+      border: none;
+      min-height: 44px;
+      border-radius: 999px;
+      padding: 0 16px;
+      color: white;
+      cursor: pointer;
+      font-family: "Trebuchet MS", sans-serif;
+      font-weight: 700;
+      box-shadow: 0 12px 24px rgba(20, 32, 43, 0.12);
+    }
+
+    .order-action.cancel {
+      background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%);
+    }
+
+    .order-action.refund {
+      background: linear-gradient(135deg, var(--accent) 0%, #1c7b85 100%);
+    }
+
+    .order-action:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+      box-shadow: none;
+    }
+
+    .action-status {
+      color: var(--muted);
+      font-family: "Trebuchet MS", sans-serif;
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .messages {
+      padding: 18px;
+      overflow: auto;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(250, 241, 232, 0.78)),
+        radial-gradient(circle at top right, rgba(21, 95, 103, 0.08), transparent 28%);
+    }
+
+    .message {
+      max-width: 78%;
+      display: grid;
+      gap: 5px;
+    }
+
+    .message.customer { justify-self: start; }
+    .message.representative { justify-self: end; }
+    .message.internal_note { justify-self: center; max-width: 92%; }
+
+    .message-label {
+      color: var(--muted);
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .bubble {
+      padding: 13px 15px;
+      border-radius: 20px;
+      line-height: 1.55;
+      background: white;
+      border: 1px solid var(--border);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .message.representative .bubble {
+      color: white;
+      border: none;
+      background: linear-gradient(135deg, var(--accent-2) 0%, #ff8d5d 100%);
+    }
+
+    .message.internal_note .bubble {
+      border-style: dashed;
+      background: rgba(255, 255, 255, 0.6);
+      color: var(--muted);
+    }
+
+    .reply-form {
+      border-left: none;
+      border-right: none;
+      border-bottom: none;
+      box-shadow: none;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 72px;
+      resize: vertical;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      padding: 13px 15px;
+      font: inherit;
+      outline: none;
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    button.send {
+      border: none;
+      border-radius: 999px;
+      min-height: 52px;
+      padding: 0 20px;
+      cursor: pointer;
+      color: white;
+      background: linear-gradient(135deg, var(--accent) 0%, #1c7b85 100%);
+      font-family: "Trebuchet MS", sans-serif;
+      font-weight: 700;
+    }
+
+    @media (max-width: 880px) {
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .command-panel { grid-template-columns: 1fr; }
+      .lookup-form { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+      .tickets { border-right: none; border-bottom: 1px solid var(--border); min-height: auto; }
+      .ticket-list { max-height: 320px; }
+      .order-grid { grid-template-columns: 1fr; }
+      .reply-form { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="topbar">
+      <div>
+        <p class="eyebrow">Support Agent View</p>
+        <h1>Human support inbox</h1>
+        <p class="muted">Open this page in another browser tab to act as the real customer support agent.</p>
+      </div>
+      <a class="back" href="/customer-support">Back to CSR Bot</a>
+    </section>
+
+    <section class="command-panel">
+      <div>
+        <p class="eyebrow">Order Command Center</p>
+        <h2>Lookup any order before replying.</h2>
+        <p class="muted">Type an order number like FD1001 to review status, payment, refund, rider, ETA, and support notes instantly.</p>
+      </div>
+      <div>
+        <form class="lookup-form" id="orderLookupForm">
+          <input id="orderLookupInput" placeholder="Enter order number, e.g. FD1001" />
+          <button class="lookup-button" type="submit">Lookup Order</button>
+          <button class="link-button" type="button" id="linkLookupOrderButton">Draft Reply</button>
+        </form>
+        <p class="lookup-status" id="orderLookupStatus">No order selected from lookup yet.</p>
+      </div>
+    </section>
+
+    <section class="grid">
+      <aside class="panel tickets">
+        <div class="panel-head">
+          <p class="eyebrow">Tickets</p>
+          <h2>Waiting queue</h2>
+          <p class="muted" id="ticketStatus">Loading tickets...</p>
+          <div class="inbox-stats" id="inboxStats"></div>
+          <div class="filter-row">
+            <input id="ticketSearch" type="search" placeholder="Search ticket, order, issue..." />
+            <select id="statusFilter">
+              <option value="all">All statuses</option>
+              <option value="waiting_for_representative">Waiting</option>
+              <option value="in_progress">In progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+        </div>
+        <div class="ticket-list" id="ticketList"></div>
+      </aside>
+
+      <section class="panel chat-panel">
+        <div class="panel-head">
+          <p class="eyebrow">Conversation</p>
+          <h2 id="activeTicketTitle">Select a ticket</h2>
+          <p class="muted" id="activeTicketMeta">Customer messages will appear here.</p>
+          <div class="ticket-actions" id="ticketActions" hidden>
+            <button class="ticket-action primary" type="button" id="assignTicketButton">Assign to me</button>
+            <button class="ticket-action" type="button" id="inProgressButton">Mark In Progress</button>
+            <button class="ticket-action" type="button" id="resolvedButton">Mark Resolved</button>
+          </div>
+        </div>
+        <section class="order-details" id="orderDetails" hidden>
+          <div>
+            <p class="eyebrow">Order Details</p>
+            <h2 id="orderTitle">No order selected</h2>
+          </div>
+          <div class="order-grid" id="orderGrid"></div>
+          <div class="order-actions" id="orderActions" hidden>
+            <button class="order-action cancel" type="button" id="cancelOrderButton">Cancel Order</button>
+            <button class="order-action refund" type="button" id="refundOrderButton">Initiate Refund</button>
+            <span class="action-status" id="orderActionStatus"></span>
+          </div>
+        </section>
+        <div class="messages" id="messages"></div>
+        <div class="quick-replies" id="quickReplies">
+          <button class="quick-reply" type="button" data-reply="I checked the backend order record and I am reviewing the next best action for you.">Order checked</button>
+          <button class="quick-reply" type="button" data-reply="I have initiated the refund request. The final timeline depends on the original payment method and bank processing time.">Refund timeline</button>
+          <button class="quick-reply" type="button" data-reply="I have updated the ticket and will continue monitoring the order until this is resolved.">Monitoring</button>
+        </div>
+        <form class="reply-form" id="replyForm">
+          <textarea id="replyInput" placeholder="Type the support-agent reply here..." disabled></textarea>
+          <button class="send" type="submit" id="replyButton" disabled>Reply</button>
+          <button class="note-button" type="button" id="internalNoteButton" disabled>Internal Note</button>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const ticketList = document.getElementById('ticketList');
+    const ticketStatus = document.getElementById('ticketStatus');
+    const inboxStats = document.getElementById('inboxStats');
+    const ticketSearch = document.getElementById('ticketSearch');
+    const statusFilter = document.getElementById('statusFilter');
+    const orderLookupForm = document.getElementById('orderLookupForm');
+    const orderLookupInput = document.getElementById('orderLookupInput');
+    const orderLookupStatus = document.getElementById('orderLookupStatus');
+    const linkLookupOrderButton = document.getElementById('linkLookupOrderButton');
+    const activeTicketTitle = document.getElementById('activeTicketTitle');
+    const activeTicketMeta = document.getElementById('activeTicketMeta');
+    const ticketActions = document.getElementById('ticketActions');
+    const assignTicketButton = document.getElementById('assignTicketButton');
+    const inProgressButton = document.getElementById('inProgressButton');
+    const resolvedButton = document.getElementById('resolvedButton');
+    const orderDetails = document.getElementById('orderDetails');
+    const orderTitle = document.getElementById('orderTitle');
+    const orderGrid = document.getElementById('orderGrid');
+    const orderActions = document.getElementById('orderActions');
+    const cancelOrderButton = document.getElementById('cancelOrderButton');
+    const refundOrderButton = document.getElementById('refundOrderButton');
+    const orderActionStatus = document.getElementById('orderActionStatus');
+    const messages = document.getElementById('messages');
+    const replyForm = document.getElementById('replyForm');
+    const replyInput = document.getElementById('replyInput');
+    const replyButton = document.getElementById('replyButton');
+    const internalNoteButton = document.getElementById('internalNoteButton');
+    let currentTicketId = '';
+    let currentOrderNumber = '';
+    let currentTicketOrderNumber = '';
+    let lastRenderedMessageKey = '';
+    let allTickets = [];
+    let latestStats = {};
+    let orderCatalog = [];
+    let lookedUpOrder = null;
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function formatStatus(status) {
+      return String(status || 'waiting_for_representative').replace(/_/g, ' ');
+    }
+
+    function renderStats(stats) {
+      latestStats = stats || {};
+      inboxStats.innerHTML = [
+        ['Total', latestStats.total || 0],
+        ['Waiting', latestStats.waiting_for_representative || 0],
+        ['In progress', latestStats.in_progress || 0],
+        ['High priority', latestStats.high_priority || 0]
+      ].map(([label, value]) => `
+        <div class="stat-card">
+          <strong>${escapeHtml(value)}</strong>
+          <span>${escapeHtml(label)}</span>
+        </div>
+      `).join('');
+    }
+
+    function getFilteredTickets() {
+      const search = ticketSearch.value.trim().toLowerCase();
+      const status = statusFilter.value;
+      return allTickets.filter((ticket) => {
+        const haystack = [
+          ticket.ticket_id,
+          ticket.order_number,
+          ticket.customer_name,
+          ticket.issue,
+          ticket.priority,
+          ticket.assigned_to,
+          ticket.status
+        ].join(' ').toLowerCase();
+        const matchesSearch = !search || haystack.includes(search);
+        const matchesStatus = status === 'all' || ticket.status === status;
+        return matchesSearch && matchesStatus;
+      });
+    }
+
+    function renderDashboard() {
+      renderTicketList(getFilteredTickets());
+    }
+
+    async function loadOrderCatalog() {
+      const response = await fetch('/support-chat/orders');
+      const data = await response.json();
+      orderCatalog = data.orders || [];
+      return orderCatalog;
+    }
+
+    async function findOrder(orderNumber) {
+      if (!orderCatalog.length) {
+        await loadOrderCatalog();
+      }
+      const normalized = String(orderNumber || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      return orderCatalog.find((order) => String(order.order_number || '').toUpperCase().replace(/[^A-Z0-9]/g, '') === normalized);
+    }
+
+    function renderTicketList(tickets) {
+      ticketList.innerHTML = '';
+      if (!tickets.length) {
+        ticketStatus.textContent = 'No human handoff tickets yet.';
+        ticketList.innerHTML = '<p class="muted">Ask the customer bot to chat with a support agent first.</p>';
+        return;
+      }
+
+      ticketStatus.textContent = `${tickets.length} ticket(s) found.`;
+      tickets.forEach((ticket) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = ticket.ticket_id === currentTicketId ? 'ticket active' : 'ticket';
+        button.innerHTML = `
+          <strong>${escapeHtml(ticket.ticket_id)}</strong>
+          <span>${escapeHtml(ticket.customer_name || 'Customer')} ${ticket.order_number ? ' - ' + escapeHtml(ticket.order_number) : ''}</span>
+          <span>${escapeHtml(ticket.issue)}</span>
+          <div class="ticket-badges">
+            <span class="badge ${String(ticket.priority || '').toLowerCase()}">${escapeHtml(ticket.priority || 'Normal')}</span>
+            <span class="badge">${escapeHtml(formatStatus(ticket.status))}</span>
+            <span class="badge">${escapeHtml(ticket.assigned_to || 'Unassigned')}</span>
+          </div>
+        `;
+        button.addEventListener('click', () => openTicket(ticket.ticket_id));
+        ticketList.appendChild(button);
+      });
+    }
+
+    function orderField(label, value, isFull = false) {
+      return `
+        <div class="order-field ${isFull ? 'full' : ''}">
+          <span>${escapeHtml(label)}</span>
+          <strong>${escapeHtml(value || 'Not available')}</strong>
+        </div>
+      `;
+    }
+
+    function renderOrderDetails(order) {
+      if (!order) {
+        orderDetails.hidden = false;
+        orderActions.hidden = true;
+        currentOrderNumber = '';
+        orderTitle.textContent = 'No linked order record found';
+        orderGrid.innerHTML = `
+          <div class="order-field full">
+            <span>Next step</span>
+            <strong>Ask the customer for a valid order number such as FD1001, then create or update the ticket with that order number.</strong>
+          </div>
+        `;
+        return;
+      }
+
+      orderDetails.hidden = false;
+      orderActions.hidden = false;
+      currentOrderNumber = order.order_number || '';
+      orderTitle.textContent = `${order.order_number} - ${order.order_status}`;
+      orderActionStatus.textContent = '';
+      cancelOrderButton.disabled = String(order.order_status || '').toLowerCase() === 'cancelled';
+      refundOrderButton.disabled = /initiated|approved|processed/i.test(String(order.refund_status || ''));
+      orderGrid.innerHTML = [
+        orderField('Customer', order.customer_name),
+        orderField('Restaurant', order.restaurant),
+        orderField('Items', order.items, true),
+        orderField('Issue status', order.issue_status, true),
+        orderField('Rider status', order.rider_status),
+        orderField('ETA', order.eta),
+        orderField('Payment status', order.payment_status),
+        orderField('Refund status', order.refund_status),
+        orderField('Total amount', order.total_amount ? `Rs. ${order.total_amount}` : 'Not available'),
+        orderField('Last update', order.last_update),
+        orderField('Delivery address', order.delivery_address, true),
+        orderField('Support note', order.support_note, true)
+      ].join('');
+    }
+
+    async function lookupOrderFromInput() {
+      const requestedOrder = orderLookupInput.value.trim();
+      if (!requestedOrder) {
+        orderLookupStatus.textContent = 'Enter an order number first, for example FD1001.';
+        return;
+      }
+
+      orderLookupStatus.textContent = 'Checking SQLite order database...';
+      lookedUpOrder = await findOrder(requestedOrder);
+
+      if (!lookedUpOrder) {
+        orderLookupStatus.textContent = `No order found for ${requestedOrder}. Try FD1001, FD1002, FD1003, FD1004, or FD1005.`;
+        return;
+      }
+
+      lastRenderedMessageKey = '';
+      renderOrderDetails(lookedUpOrder);
+      orderLookupStatus.textContent = `Showing ${lookedUpOrder.order_number}: ${lookedUpOrder.order_status}, ${lookedUpOrder.eta}.`;
+    }
+
+    async function runOrderAction(action) {
+      if (!currentOrderNumber) {
+        orderActionStatus.textContent = 'Look up or select an order first.';
+        return;
+      }
+
+      const actionLabel = action === 'cancel' ? 'Cancelling order...' : 'Initiating refund...';
+      orderActionStatus.textContent = actionLabel;
+      cancelOrderButton.disabled = true;
+      refundOrderButton.disabled = true;
+
+      try {
+        const actionTicketId = currentTicketId && currentTicketOrderNumber === String(currentOrderNumber || '').toUpperCase().replace(/[^A-Z0-9]/g, '')
+          ? currentTicketId
+          : null;
+        const response = await fetch(`/support-chat/orders/${encodeURIComponent(currentOrderNumber)}/${action}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ticket_id: actionTicketId })
+        });
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          orderActionStatus.textContent = result.error || 'Unable to update the order.';
+          cancelOrderButton.disabled = false;
+          refundOrderButton.disabled = false;
+          return;
+        }
+
+        lastRenderedMessageKey = '';
+        orderCatalog = [];
+        if (actionTicketId) {
+          await openTicket(currentTicketId);
+        } else {
+          lookedUpOrder = result.order;
+          renderOrderDetails(result.order);
+        }
+        orderActionStatus.textContent = result.message || 'Order updated in SQLite.';
+      } catch (error) {
+        console.error(error);
+        orderActionStatus.textContent = 'Unable to reach the order action service.';
+        cancelOrderButton.disabled = false;
+        refundOrderButton.disabled = false;
+      }
+    }
+
+    function renderMessages(ticket) {
+      const orderKey = ticket.order ? Object.values(ticket.order).join(':') : 'no-order';
+      const key = `${orderKey}|${ticket.messages.map((message) => `${message.id}:${message.sender}:${message.message}`).join('|')}`;
+      if (key === lastRenderedMessageKey) return;
+      lastRenderedMessageKey = key;
+      messages.innerHTML = '';
+      activeTicketTitle.textContent = ticket.ticket_id;
+      activeTicketMeta.textContent = `${ticket.customer_name || 'Customer'} ${ticket.order_number ? 'for order ' + ticket.order_number : ''} - ${formatStatus(ticket.status)} - ${ticket.priority || 'Normal'} priority - ${ticket.assigned_to || 'Unassigned'}`;
+      ticketActions.hidden = false;
+      currentTicketOrderNumber = String(ticket.order_number || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      renderOrderDetails(ticket.order);
+      replyInput.disabled = false;
+      replyButton.disabled = false;
+      internalNoteButton.disabled = false;
+      inProgressButton.disabled = ticket.status === 'in_progress';
+      resolvedButton.disabled = ticket.status === 'resolved';
+
+      ticket.messages.forEach((message) => {
+        const row = document.createElement('div');
+        row.className = `message ${message.sender}`;
+        const label = message.sender === 'customer'
+          ? 'Customer support note'
+          : (message.sender === 'internal_note' ? 'Internal note' : 'Support agent');
+        row.innerHTML = `
+          <div class="message-label">${escapeHtml(label)}</div>
+          <div class="bubble">${escapeHtml(message.message)}</div>
+        `;
+        messages.appendChild(row);
+      });
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function loadTickets() {
+      try {
+        const response = await fetch('/support-chat/handoffs');
+        const data = await response.json();
+        allTickets = data.handoffs || [];
+        renderStats(data.stats || {});
+        renderDashboard();
+        if (!currentTicketId && allTickets.length) {
+          await openTicket(allTickets[0].ticket_id);
+        }
+      } catch (error) {
+        console.error(error);
+        ticketStatus.textContent = 'Unable to load tickets.';
+      }
+    }
+
+    async function openTicket(ticketId) {
+      currentTicketId = ticketId;
+      try {
+        const response = await fetch(`/support-chat/handoffs/${encodeURIComponent(ticketId)}/messages`);
+        const data = await response.json();
+        if (!data.success) {
+          activeTicketMeta.textContent = data.error || 'Ticket not found.';
+          return;
+        }
+        renderMessages(data.ticket);
+        await loadTickets();
+      } catch (error) {
+        console.error(error);
+        activeTicketMeta.textContent = 'Unable to load conversation.';
+      }
+    }
+
+    async function updateCurrentTicket(payload) {
+      if (!currentTicketId) return;
+      try {
+        const response = await fetch(`/support-chat/handoffs/${encodeURIComponent(currentTicketId)}/update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          activeTicketMeta.textContent = data.error || 'Unable to update ticket.';
+          return;
+        }
+        lastRenderedMessageKey = '';
+        await openTicket(currentTicketId);
+      } catch (error) {
+        console.error(error);
+        activeTicketMeta.textContent = 'Unable to reach ticket update service.';
+      }
+    }
+
+    replyForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const message = replyInput.value.trim();
+      if (!message || !currentTicketId) return;
+      replyInput.value = '';
+      await fetch('/support-chat/human-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ticket_id: currentTicketId,
+          sender: 'representative',
+          message
+        })
+      });
+      await openTicket(currentTicketId);
+    });
+
+    cancelOrderButton.addEventListener('click', async () => {
+      await runOrderAction('cancel');
+    });
+
+    refundOrderButton.addEventListener('click', async () => {
+      await runOrderAction('refund');
+    });
+
+    assignTicketButton.addEventListener('click', async () => {
+      await updateCurrentTicket({
+        assigned_to: 'Demo Agent',
+        status: 'in_progress',
+        internal_note: 'Agent accepted ownership of this ticket.'
+      });
+    });
+
+    inProgressButton.addEventListener('click', async () => {
+      await updateCurrentTicket({ status: 'in_progress' });
+    });
+
+    resolvedButton.addEventListener('click', async () => {
+      await updateCurrentTicket({
+        status: 'resolved',
+        resolution: replyInput.value.trim() || 'Issue resolved by support agent.'
+      });
+    });
+
+    internalNoteButton.addEventListener('click', async () => {
+      const note = replyInput.value.trim();
+      if (!note || !currentTicketId) return;
+      replyInput.value = '';
+      await updateCurrentTicket({ internal_note: note });
+    });
+
+    document.querySelectorAll('.quick-reply').forEach((button) => {
+      button.addEventListener('click', () => {
+        replyInput.value = button.dataset.reply || '';
+        replyInput.focus();
+      });
+    });
+
+    ticketSearch.addEventListener('input', renderDashboard);
+    statusFilter.addEventListener('change', renderDashboard);
+
+    orderLookupForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      await lookupOrderFromInput();
+    });
+
+    linkLookupOrderButton.addEventListener('click', async () => {
+      if (!lookedUpOrder) {
+        orderLookupStatus.textContent = 'Look up an order first, then draft a reply from that order.';
+        return;
+      }
+      if (!currentTicketId) {
+        orderLookupStatus.textContent = 'Select a ticket first before using this order in a ticket.';
+        return;
+      }
+      replyInput.value = `I checked order ${lookedUpOrder.order_number}. Current status: ${lookedUpOrder.order_status}. ETA: ${lookedUpOrder.eta}. Payment: ${lookedUpOrder.payment_status}. Refund: ${lookedUpOrder.refund_status}.`;
+      renderOrderDetails(lookedUpOrder);
+      orderLookupStatus.textContent = `Prepared a professional reply using ${lookedUpOrder.order_number}.`;
+      replyInput.focus();
+    });
+
+    loadTickets();
+    loadOrderCatalog().catch((error) => console.error(error));
+    setInterval(async () => {
+      if (currentTicketId) {
+        await openTicket(currentTicketId);
+      } else {
+        await loadTickets();
+      }
+    }, 4000);
+  </script>
+</body>
+</html>

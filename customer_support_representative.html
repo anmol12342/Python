@@ -340,6 +340,13 @@
       transform: translateY(-2px);
     }
 
+    #humanSupportButton {
+      color: white;
+      border-color: rgba(240, 108, 55, 0.35);
+      background: linear-gradient(135deg, var(--accent) 0%, #ff8d5d 100%);
+      box-shadow: 0 10px 22px rgba(240, 108, 55, 0.16);
+    }
+
     .toolbar-messages {
       padding: 16px 18px;
       overflow: auto;
@@ -471,11 +478,13 @@
         <p class="eyebrow">Customer Support Representative</p>
         <h1>RAG chatbot for food delivery support.</h1>
         <p class="lead">
-          This page simulates a Swiggy-style customer support representative. The floating toolbar opens a grounded support chatbot that can answer questions about delayed orders, cancellations, missing items, refunds, payment problems, and address changes using retrieval-augmented generation.
+          This page simulates a Swiggy-style customer support representative. The floating toolbar opens a grounded support chatbot that can answer policy questions, check real sample order records from a SQLite backend, and hand off the conversation to a human support-agent queue.
         </p>
 
         <div class="actions">
           <a class="primary-btn" href="#" id="openSupportToolbar">Open Support Toolbar</a>
+          <a class="primary-btn" href="#" id="startHumanSupport">Chat With Human Agent</a>
+          <a class="secondary-btn" href="/support-representative" target="_blank">Open Representative Inbox</a>
           <a class="secondary-btn" href="/">Back to Landing Page</a>
         </div>
 
@@ -485,12 +494,12 @@
             <span>The assistant retrieves answers from a support knowledge base before responding.</span>
           </div>
           <div class="feature">
-            <strong>Customer support tone</strong>
-            <span>Replies are short, calm, and practical like a real food delivery representative.</span>
+            <strong>SQLite order lookup</strong>
+            <span>When the user shares an order number, the bot checks backend order data before answering.</span>
           </div>
           <div class="feature">
-            <strong>Floating toolbar UX</strong>
-            <span>The chat stays accessible in the bottom corner while the rest of the page remains visible.</span>
+            <strong>Human handoff</strong>
+            <span>The customer can create a support ticket for a real support agent to continue the chat.</span>
           </div>
         </div>
       </div>
@@ -498,10 +507,10 @@
       <aside class="panel hero-side">
         <p class="eyebrow">Conversation Preview</p>
         <div class="mock-chat">
-          <div class="mock-bubble user">My order is 30 minutes late and I still do not see movement.</div>
-          <div class="mock-bubble bot">I am sorry your order is delayed. I can help you check whether pickup is still pending or the rider is already on the way, and if the delay becomes significant support can review escalation or compensation options.</div>
-          <div class="mock-bubble user">Can I cancel now?</div>
-          <div class="mock-bubble bot">Cancellation is usually possible only before preparation starts. If the restaurant has already started preparing the food or the rider has been assigned, cancellation may be limited or only a partial refund may apply.</div>
+          <div class="mock-bubble user">My order FD1001 is late.</div>
+          <div class="mock-bubble bot">I found FD1001 in the backend. It is delayed because the restaurant is still packing it, and the rider is waiting near pickup.</div>
+          <div class="mock-bubble user">I want to talk to a person.</div>
+          <div class="mock-bubble bot">A human support-agent ticket was created and the conversation was saved for the support team.</div>
         </div>
 
         <div class="data-preview">
@@ -511,11 +520,11 @@
           </div>
           <div class="data-row">
             <span>AI pattern</span>
-            <strong>RAG customer support</strong>
+            <strong>RAG + SQLite lookup</strong>
           </div>
           <div class="data-row">
             <span>Access</span>
-            <strong>Floating support toolbar</strong>
+            <strong>Bot + human handoff</strong>
           </div>
         </div>
       </aside>
@@ -527,19 +536,19 @@
       <div class="samples">
         <div class="sample-card">
           <strong>Delayed order</strong>
-          <span>Ask what to do when food delivery is late and the rider has not moved.</span>
+          <span>Try FD1001 to see a delayed order pulled from the SQLite backend.</span>
         </div>
         <div class="sample-card">
           <strong>Missing item</strong>
-          <span>Ask how support handles a missing drink or an incorrect item.</span>
+          <span>Try FD1002 to see a delivered order with a missing item and partial refund.</span>
         </div>
         <div class="sample-card">
           <strong>Cancellation</strong>
-          <span>Ask whether cancellation is still possible after preparation has started.</span>
+          <span>Try FD1003 to see a preparation-stage order where cancellation may be blocked.</span>
         </div>
         <div class="sample-card">
-          <strong>Address change</strong>
-          <span>Ask whether the delivery address can be updated after placing the order.</span>
+          <strong>Human support agent</strong>
+          <span>Click the human support-agent option to create a support ticket in SQLite.</span>
         </div>
       </div>
     </section>
@@ -555,14 +564,17 @@
           </div>
           <span class="toolbar-dot" aria-hidden="true"></span>
         </div>
-        <p class="toolbar-subtitle">Ask about delays, refunds, missing items, payments, or address changes.</p>
+        <p class="toolbar-subtitle">Ask about delays, refunds, missing items, payments, or share an order number like FD1001.</p>
       </div>
 
       <div class="toolbar-quick">
         <button class="toolbar-chip" type="button" data-question="My order is delayed. What should I do?">Delayed order</button>
+        <button class="toolbar-chip" type="button" data-question="FD1001">Check FD1001</button>
+        <button class="toolbar-chip" type="button" data-question="FD1002">Check FD1002</button>
         <button class="toolbar-chip" type="button" data-question="Can I cancel my order after preparation starts?">Cancel order</button>
         <button class="toolbar-chip" type="button" data-question="An item is missing from my order. What can support do?">Missing item</button>
         <button class="toolbar-chip" type="button" data-question="Can I change my delivery address after ordering?">Change address</button>
+        <button class="toolbar-chip" type="button" id="humanSupportButton">Chat with support agent</button>
       </div>
 
       <div class="toolbar-messages" id="toolbarMessages"></div>
@@ -585,14 +597,22 @@
     const toolbarInput = document.getElementById('toolbarInput');
     const toolbarForm = document.getElementById('toolbarForm');
     const openSupportToolbar = document.getElementById('openSupportToolbar');
+    const startHumanSupport = document.getElementById('startHumanSupport');
+    const humanSupportButton = document.getElementById('humanSupportButton');
+    let supportTranscript = [];
+    let latestSupportQuestion = '';
+    let latestOrderNumber = '';
+    let humanMode = false;
+    let humanTicketId = '';
+    const seenRepresentativeMessageIds = new Set();
 
     function appendMessage(role, text) {
       const wrapper = document.createElement('div');
-      wrapper.className = `message ${role}`;
+      wrapper.className = role === 'user' ? 'message user' : 'message assistant';
 
       const label = document.createElement('div');
       label.className = 'message-label';
-      label.textContent = role === 'user' ? 'You' : 'Support';
+      label.textContent = role === 'user' ? 'You' : (role === 'human' ? 'Support Agent' : 'Support');
 
       const bubble = document.createElement('div');
       bubble.className = 'message-bubble';
@@ -602,6 +622,21 @@
       wrapper.appendChild(bubble);
       toolbarMessages.appendChild(wrapper);
       toolbarMessages.scrollTop = toolbarMessages.scrollHeight;
+
+      supportTranscript.push({
+        role,
+        text,
+        created_at: new Date().toISOString()
+      });
+      supportTranscript = supportTranscript.slice(-30);
+    }
+
+    function extractOrderNumberFromText(text) {
+      const normalized = (text || '').toUpperCase();
+      const prefixed = normalized.match(/\b(?:FD|ORD|SWG)[-\s]?\d{3,8}\b/);
+      if (prefixed) return prefixed[0].replace(/[^A-Z0-9]/g, '');
+      const plain = normalized.match(/\b\d{4,8}\b/);
+      return plain ? plain[0] : '';
     }
 
     function openToolbar() {
@@ -614,14 +649,58 @@
       toolbarButton.textContent = 'Support';
     }
 
+    async function sendHumanTicketMessage(question) {
+      const trimmed = (question || '').trim();
+      if (!trimmed || !humanTicketId) return;
+
+      openToolbar();
+      appendMessage('user', trimmed);
+      toolbarStatus.textContent = `Sending to support-agent ticket ${humanTicketId}...`;
+      toolbarInput.value = '';
+
+      try {
+        const response = await fetch('/support-chat/human-message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ticket_id: humanTicketId,
+            sender: 'customer',
+            message: trimmed
+          })
+        });
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          toolbarStatus.textContent = 'Unable to send message to the support agent.';
+          appendMessage('assistant', result.error || 'I could not save this message to the human support ticket.');
+          return;
+        }
+
+        toolbarStatus.textContent = `Human agent mode: ${humanTicketId}`;
+        appendMessage('human', 'Your message has been saved for the support agent. The support team can continue from the saved ticket queue.');
+      } catch (error) {
+        console.error(error);
+        toolbarStatus.textContent = 'Unable to reach human handoff service.';
+        appendMessage('assistant', 'I could not reach the human handoff service right now. Please try again shortly.');
+      }
+    }
+
     async function sendSupportQuestion(question) {
       const trimmed = (question || '').trim();
       if (!trimmed) return;
+
+      if (humanMode && humanTicketId) {
+        await sendHumanTicketMessage(trimmed);
+        return;
+      }
 
       openToolbar();
       appendMessage('user', trimmed);
       toolbarStatus.textContent = 'Searching support knowledge base...';
       toolbarInput.value = '';
+      latestSupportQuestion = trimmed;
+      const orderFromText = extractOrderNumberFromText(trimmed);
+      if (orderFromText) latestOrderNumber = orderFromText;
 
       try {
         const response = await fetch('/support-chat/query', {
@@ -637,12 +716,79 @@
           return;
         }
 
-        appendMessage('assistant', result.answer || 'I am here to help with your order.');
-        toolbarStatus.textContent = 'Grounded answer from support RAG.';
+        if (result.order && result.order.order_number) {
+          latestOrderNumber = result.order.order_number;
+        } else if (result.order_number) {
+          latestOrderNumber = result.order_number;
+        }
+
+        appendMessage('assistant', result.answer || 'Support information is ready for your order.');
+        toolbarStatus.textContent = result.mode === 'order_lookup'
+          ? `Checked SQLite order record ${latestOrderNumber}.`
+          : 'Grounded answer from support RAG.';
       } catch (error) {
         console.error(error);
         toolbarStatus.textContent = 'Unable to reach support service.';
         appendMessage('assistant', 'I am sorry, the support service is unavailable at the moment. Please try again shortly.');
+      }
+    }
+
+    async function requestHumanRepresentative() {
+      openToolbar();
+      appendMessage('user', 'Please connect me with a human support agent.');
+      toolbarStatus.textContent = 'Creating human support-agent ticket...';
+
+      const issue = latestSupportQuestion || 'Customer requested a human support agent from the support toolbar.';
+      const orderNumber = latestOrderNumber || extractOrderNumberFromText(issue);
+
+      try {
+        const response = await fetch('/support-chat/handoff', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_number: orderNumber || null,
+            customer_name: null,
+            issue,
+            transcript: supportTranscript
+          })
+        });
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          toolbarStatus.textContent = 'Unable to create human handoff ticket.';
+          appendMessage('assistant', result.error || 'I could not create a human support-agent ticket right now.');
+          return;
+        }
+
+        humanMode = true;
+        humanTicketId = result.ticket_id;
+        seenRepresentativeMessageIds.clear();
+        toolbarInput.placeholder = 'Human agent mode: type a message for the ticket...';
+        toolbarStatus.textContent = `Human agent mode: ${humanTicketId}`;
+        appendMessage('human', result.message || `Ticket ${humanTicketId} created for a human support agent.`);
+      } catch (error) {
+        console.error(error);
+        toolbarStatus.textContent = 'Unable to reach human handoff service.';
+        appendMessage('assistant', 'I could not create the human support-agent ticket right now. Please try again shortly.');
+      }
+    }
+
+    async function pollRepresentativeReplies() {
+      if (!humanMode || !humanTicketId) return;
+      try {
+        const response = await fetch(`/support-chat/handoffs/${encodeURIComponent(humanTicketId)}/messages`);
+        const result = await response.json();
+        if (!result.success || !result.ticket || !Array.isArray(result.ticket.messages)) return;
+        const readableStatus = String(result.ticket.status || 'waiting_for_representative').replace(/_/g, ' ');
+        toolbarStatus.textContent = `Ticket ${humanTicketId}: ${readableStatus}`;
+
+        result.ticket.messages.forEach((message) => {
+          if (message.sender !== 'representative' || seenRepresentativeMessageIds.has(message.id)) return;
+          seenRepresentativeMessageIds.add(message.id);
+          appendMessage('human', message.message);
+        });
+      } catch (error) {
+        console.error(error);
       }
     }
 
@@ -655,11 +801,21 @@
       }
     });
 
-    openSupportToolbar.addEventListener('click', (event) => {
-      event.preventDefault();
-      openToolbar();
-      toolbarInput.focus();
-    });
+    if (openSupportToolbar) {
+      openSupportToolbar.addEventListener('click', (event) => {
+        event.preventDefault();
+        openToolbar();
+        toolbarInput.focus();
+      });
+    }
+
+    if (startHumanSupport) {
+      startHumanSupport.addEventListener('click', async (event) => {
+        event.preventDefault();
+        await requestHumanRepresentative();
+        toolbarInput.focus();
+      });
+    }
 
     toolbarForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -668,12 +824,23 @@
 
     document.querySelectorAll('.toolbar-chip').forEach((button) => {
       button.addEventListener('click', async () => {
+        if (button.id === 'humanSupportButton') return;
         await sendSupportQuestion(button.dataset.question || '');
       });
     });
 
-    appendMessage('assistant', 'Hi, I am your food delivery support assistant. I can help with delayed orders, cancellations, refunds, payment issues, missing items, and address changes.');
+    humanSupportButton.addEventListener('click', async () => {
+      await requestHumanRepresentative();
+      toolbarInput.focus();
+    });
+
+    appendMessage('assistant', 'Welcome to food delivery support. Share an order number like FD1001 to check the SQLite backend record, or choose Chat with support agent to create a human support ticket.');
     toolbarStatus.textContent = 'Support assistant ready.';
+    setInterval(pollRepresentativeReplies, 4000);
+
+    if (new URLSearchParams(window.location.search).get('human') === '1') {
+      requestHumanRepresentative();
+    }
   </script>
 </body>
 </html>

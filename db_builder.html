@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Database Builder Chatbot</title>
+  <style>
+    :root {
+      --ink: #101820;
+      --muted: #55616b;
+      --panel: rgba(255, 255, 255, 0.78);
+      --border: rgba(16, 24, 32, 0.12);
+      --shadow: 0 22px 60px rgba(16, 24, 32, 0.12);
+      --accent: #0f766e;
+      --accent-2: #f97316;
+      --good: #0f766e;
+      --bad: #b91c1c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: ui-serif, Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(249, 115, 22, 0.18), transparent 35%),
+        radial-gradient(circle at 90% 10%, rgba(15, 118, 110, 0.18), transparent 38%),
+        linear-gradient(135deg, #f8fafc 0%, #f4efe9 55%, #fff7ed 100%);
+      padding: 24px;
+    }
+
+    .shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .crumbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 14px 30px rgba(16, 24, 32, 0.08);
+      text-decoration: none;
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .crumbs span {
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+    }
+
+    .copy {
+      padding: 34px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .eyebrow {
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.76rem;
+      color: rgba(15, 118, 110, 0.95);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.1rem, 3.6vw, 3.1rem);
+      line-height: 1.02;
+      max-width: 18ch;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+      max-width: 70ch;
+      font-size: 1.04rem;
+    }
+
+    .hint-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .hint {
+      padding: 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(16, 24, 32, 0.1);
+      background: rgba(255, 255, 255, 0.68);
+    }
+
+    .hint strong {
+      display: block;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    .hint span {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.92rem;
+    }
+
+    .chat {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      min-height: 620px;
+    }
+
+    .chat-head {
+      padding: 18px 20px 16px;
+      border-bottom: 1px solid rgba(16, 24, 32, 0.09);
+      background:
+        linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(249, 115, 22, 0.10));
+    }
+
+    .chat-head h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      letter-spacing: 0.01em;
+    }
+
+    .chat-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.94rem;
+    }
+
+    .quick {
+      padding: 12px 16px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid rgba(16, 24, 32, 0.08);
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .chip {
+      border: 1px solid rgba(16, 24, 32, 0.14);
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .chip:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 18px rgba(16, 24, 32, 0.09);
+    }
+
+    .messages {
+      padding: 16px;
+      overflow: auto;
+      display: grid;
+      gap: 12px;
+    }
+
+    .msg {
+      display: grid;
+      gap: 6px;
+    }
+
+    .msg .who {
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size: 0.78rem;
+      color: rgba(16, 24, 32, 0.68);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
+    .bubble {
+      padding: 12px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(16, 24, 32, 0.1);
+      background: rgba(255, 255, 255, 0.8);
+      line-height: 1.55;
+      max-width: 92%;
+      box-shadow: 0 12px 26px rgba(16, 24, 32, 0.06);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .msg.user {
+      justify-items: end;
+    }
+
+    .msg.user .bubble {
+      color: white;
+      border: none;
+      background: linear-gradient(135deg, var(--accent) 0%, #0ea5a5 100%);
+      box-shadow: 0 16px 32px rgba(15, 118, 110, 0.22);
+      border-bottom-right-radius: 7px;
+    }
+
+    .status {
+      padding: 10px 16px;
+      border-top: 1px solid rgba(16, 24, 32, 0.08);
+      color: var(--muted);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-weight: 600;
+      font-size: 0.92rem;
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .composer {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.72);
+      border-top: 1px solid rgba(16, 24, 32, 0.08);
+    }
+
+    textarea {
+      resize: none;
+      min-height: 46px;
+      max-height: 140px;
+      padding: 12px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(16, 24, 32, 0.16);
+      font: inherit;
+      line-height: 1.4;
+      background: rgba(255, 255, 255, 0.88);
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: rgba(15, 118, 110, 0.55);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+    }
+
+    .send {
+      border: none;
+      border-radius: 999px;
+      padding: 0 18px;
+      min-height: 46px;
+      cursor: pointer;
+      color: white;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      background: linear-gradient(135deg, var(--accent-2) 0%, #fb923c 100%);
+      box-shadow: 0 16px 34px rgba(249, 115, 22, 0.22);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
+
+    .send:hover { transform: translateY(-1px); filter: saturate(1.05); }
+    .send:active { transform: translateY(0px); }
+
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+      .chat { min-height: 560px; }
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 14px; }
+      .copy { padding: 24px; }
+      .hint-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <a class="crumbs" href="/"><span>Back</span> Landing</a>
+      <div class="crumbs" style="pointer-events:none;">
+        Database Builder <span>Chatbot</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="panel copy">
+        <p class="eyebrow">Assignment Mode</p>
+        <h1>Tell me what database you want, and I will build it.</h1>
+        <p class="lead">
+          This chatbot will ask you what kind of database you want to create, the use case, the main entity,
+          the fields, and one sample record. Then it creates the database and inserts the sample data.
+        </p>
+        <div class="hint-grid">
+          <div class="hint">
+            <strong>SQLite</strong>
+            <span>Creates a local <code>.db</code> file and one table.</span>
+          </div>
+          <div class="hint">
+            <strong>MongoDB</strong>
+            <span>Tries local MongoDB, and falls back to a JSON document store if Mongo is not running.</span>
+          </div>
+          <div class="hint">
+            <strong>Format</strong>
+            <span>Fields: <code>name:type, total:real, created_at:date</code></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel chat">
+        <header class="chat-head">
+          <h2>Database Builder Assistant</h2>
+          <p>Type <strong>restart</strong> anytime to start over.</p>
+        </header>
+
+        <div class="quick">
+          <button class="chip" type="button" data-msg="sqlite">SQLite</button>
+          <button class="chip" type="button" data-msg="mongodb">MongoDB</button>
+          <button class="chip" type="button" data-msg="Food delivery app orders and payments">Use case idea</button>
+          <button class="chip" type="button" data-msg="restart">Restart</button>
+        </div>
+
+        <div class="messages" id="messages"></div>
+        <div class="status" id="status">Connecting...</div>
+
+        <form class="composer" id="composer">
+          <textarea id="input" placeholder="Type here..."></textarea>
+          <button class="send" type="submit">Send</button>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const messagesEl = document.getElementById('messages');
+    const statusEl = document.getElementById('status');
+    const inputEl = document.getElementById('input');
+    const composerEl = document.getElementById('composer');
+
+    function append(role, text) {
+      const wrap = document.createElement('div');
+      wrap.className = `msg ${role}`;
+
+      const who = document.createElement('div');
+      who.className = 'who';
+      who.textContent = role === 'user' ? 'You' : 'Bot';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = text;
+
+      wrap.appendChild(who);
+      wrap.appendChild(bubble);
+      messagesEl.appendChild(wrap);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function setStatus(text) {
+      statusEl.textContent = text;
+    }
+
+    function getConversationId() {
+      return localStorage.getItem('db_builder_conversation_id') || '';
+    }
+
+    function setConversationId(id) {
+      if (!id) return;
+      localStorage.setItem('db_builder_conversation_id', id);
+    }
+
+    async function sendMessage(message, { echoUser = true } = {}) {
+      const trimmed = (message || '').trim();
+      if (!trimmed) return;
+      if (echoUser) append('user', trimmed);
+      setStatus('Thinking...');
+
+      try {
+        const res = await fetch('/db-builder/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conversation_id: getConversationId() || null,
+            message: trimmed
+          })
+        });
+        const data = await res.json();
+        if (data.conversation_id) setConversationId(data.conversation_id);
+        append('assistant', data.assistant || '...');
+        setStatus(data.stage ? `Stage: ${data.stage}` : 'Ready.');
+      } catch (err) {
+        console.error(err);
+        setStatus('Server not reachable.');
+        append('assistant', 'I could not reach the server. Please make sure FastAPI is running and try again.');
+      }
+    }
+
+    composerEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const value = inputEl.value;
+      inputEl.value = '';
+      await sendMessage(value);
+      inputEl.focus();
+    });
+
+    document.querySelectorAll('.chip').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        await sendMessage(btn.dataset.msg || '');
+        inputEl.focus();
+      });
+    });
+
+    // Kick off
+    setStatus('Ready.');
+    sendMessage('start', { echoUser: false });
+  </script>
+</body>
+</html>
+

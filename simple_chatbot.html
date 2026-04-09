@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Chatbot</title>
+  <style>
+    :root {
+      --bg: #f5efe8;
+      --panel: rgba(255, 250, 245, 0.92);
+      --ink: #1d2430;
+      --muted: #66717d;
+      --accent: #e46f42;
+      --accent-dark: #c5572f;
+      --border: rgba(29, 36, 48, 0.12);
+      --shadow: 0 24px 60px rgba(29, 36, 48, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(228, 111, 66, 0.2), transparent 28%),
+        radial-gradient(circle at top right, rgba(53, 111, 140, 0.12), transparent 24%),
+        linear-gradient(135deg, #f8f1e8, #efe4d7);
+      padding: 24px;
+    }
+
+    .shell {
+      width: min(920px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .topbar,
+    .chat-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .topbar {
+      padding: 24px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.78rem;
+      color: var(--accent-dark);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 5vw, 3rem);
+      line-height: 1;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 56ch;
+    }
+
+    .link-btn,
+    .send-btn,
+    .chip-btn {
+      border: none;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      font: inherit;
+    }
+
+    .link-btn,
+    .send-btn {
+      min-height: 48px;
+      padding: 0 20px;
+      border-radius: 999px;
+      color: white;
+      text-decoration: none;
+      background: linear-gradient(135deg, var(--accent), #f09468);
+      box-shadow: 0 14px 28px rgba(228, 111, 66, 0.24);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .link-btn:hover,
+    .send-btn:hover,
+    .chip-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .chat-panel {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto auto;
+      min-height: 72vh;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      padding: 24px 28px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chat-header strong {
+      display: block;
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+    }
+
+    .chat-header span {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .chips {
+      padding: 18px 28px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip-btn {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(228, 111, 66, 0.1);
+      color: var(--accent-dark);
+      border: 1px solid rgba(228, 111, 66, 0.18);
+    }
+
+    .messages {
+      padding: 20px 28px;
+      overflow-y: auto;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(248, 239, 231, 0.82)),
+        radial-gradient(circle at top right, rgba(228, 111, 66, 0.08), transparent 30%);
+    }
+
+    .message {
+      max-width: min(78ch, 86%);
+      display: grid;
+      gap: 6px;
+    }
+
+    .message.user {
+      justify-self: end;
+    }
+
+    .message.assistant {
+      justify-self: start;
+    }
+
+    .label {
+      font-size: 0.76rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .bubble {
+      padding: 14px 16px;
+      border-radius: 20px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      box-shadow: 0 10px 24px rgba(29, 36, 48, 0.06);
+    }
+
+    .message.assistant .bubble {
+      background: white;
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 8px;
+    }
+
+    .message.user .bubble {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), #f09468);
+      border-bottom-right-radius: 8px;
+    }
+
+    .status {
+      min-height: 24px;
+      padding: 0 28px;
+      color: var(--muted);
+    }
+
+    .status.error {
+      color: #b42318;
+    }
+
+    .composer {
+      padding: 14px 28px 28px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 66px;
+      max-height: 160px;
+      resize: vertical;
+      border-radius: 18px;
+      border: 1px solid rgba(29, 36, 48, 0.16);
+      padding: 14px 16px;
+      font: inherit;
+      color: var(--ink);
+      background: white;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: rgba(228, 111, 66, 0.6);
+      box-shadow: 0 0 0 3px rgba(228, 111, 66, 0.12);
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 14px;
+      }
+
+      .topbar,
+      .chat-header,
+      .chips,
+      .messages,
+      .status,
+      .composer {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .composer {
+        grid-template-columns: 1fr;
+      }
+
+      .message {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="topbar">
+      <div>
+        <p class="eyebrow">Simple Demo</p>
+        <h1>Simple Chatbot</h1>
+        <p class="lead">
+          A very small chatbot screen backed by a single FastAPI endpoint. Type a message, send it, and the latest conversation stays on the page.
+        </p>
+      </div>
+      <a class="link-btn" href="/">Back to Landing</a>
+    </section>
+
+    <section class="chat-panel">
+      <div class="chat-header">
+        <strong>Ask anything</strong>
+        <span>This version keeps the implementation simple by sending your message and a short recent history to the backend.</span>
+      </div>
+
+      <div class="chips">
+        <button class="chip-btn" type="button" data-prompt="Tell me a short joke.">Tell me a short joke</button>
+        <button class="chip-btn" type="button" data-prompt="Summarize why chatbots are useful in one paragraph.">Why are chatbots useful?</button>
+        <button class="chip-btn" type="button" data-prompt="Give me 3 beginner Python project ideas.">Python project ideas</button>
+      </div>
+
+      <div class="messages" id="messages"></div>
+      <div class="status" id="status"></div>
+
+      <form class="composer" id="chatForm">
+        <textarea id="messageInput" placeholder="Type your message here..."></textarea>
+        <button class="send-btn" id="sendBtn" type="submit">Send</button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const messagesEl = document.getElementById('messages');
+    const statusEl = document.getElementById('status');
+    const chatForm = document.getElementById('chatForm');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const promptButtons = document.querySelectorAll('[data-prompt]');
+
+    const chatHistory = [];
+
+    function appendMessage(role, text) {
+      const item = document.createElement('div');
+      item.className = `message ${role}`;
+
+      const label = document.createElement('div');
+      label.className = 'label';
+      label.textContent = role === 'user' ? 'You' : 'Chatbot';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = text;
+
+      item.appendChild(label);
+      item.appendChild(bubble);
+      messagesEl.appendChild(item);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function setStatus(text, isError = false) {
+      statusEl.textContent = text || '';
+      statusEl.classList.toggle('error', isError);
+    }
+
+    function setLoading(loading) {
+      sendBtn.disabled = loading;
+      sendBtn.textContent = loading ? 'Sending...' : 'Send';
+      messageInput.disabled = loading;
+    }
+
+    async function sendMessage(message) {
+      const trimmedMessage = message.trim();
+      if (!trimmedMessage) {
+        setStatus('Please enter a message.', true);
+        return;
+      }
+
+      const historyForRequest = chatHistory.slice(-8);
+      appendMessage('user', trimmedMessage);
+      chatHistory.push({ role: 'user', text: trimmedMessage });
+      messageInput.value = '';
+      setStatus('Chatbot is thinking...');
+      setLoading(true);
+
+      try {
+        const response = await fetch('/simple-chatbot/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: trimmedMessage,
+            history: historyForRequest
+          })
+        });
+
+        const result = await response.json();
+        if (!response.ok || result.error) {
+          throw new Error(result.error || 'Something went wrong.');
+        }
+
+        const reply = (result.reply || '').trim() || 'I could not generate a reply just now.';
+        appendMessage('assistant', reply);
+        chatHistory.push({ role: 'assistant', text: reply });
+        setStatus('');
+      } catch (error) {
+        appendMessage('assistant', 'Sorry, I ran into an error while answering. Please try again.');
+        chatHistory.push({
+          role: 'assistant',
+          text: 'Sorry, I ran into an error while answering. Please try again.'
+        });
+        setStatus(error.message || 'Something went wrong.', true);
+      } finally {
+        setLoading(false);
+        messageInput.focus();
+      }
+    }
+
+    chatForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      sendMessage(messageInput.value);
+    });
+
+    promptButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        messageInput.value = button.dataset.prompt || '';
+        messageInput.focus();
+      });
+    });
+
+    appendMessage('assistant', 'Hello! I am a simple chatbot demo. Ask me anything to test the flow.');
+    chatHistory.push({
+      role: 'assistant',
+      text: 'Hello! I am a simple chatbot demo. Ask me anything to test the flow.'
+    });
+    messageInput.focus();
+  </script>
+</body>
+</html>

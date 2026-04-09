@@ -27,6 +27,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 GENERATED_PAGES_DIR = os.path.join(BASE_DIR, "generated_pages")
 GENERATED_PAGE_ASSETS_DIR = os.path.join(GENERATED_PAGES_DIR, "assets")
 MCP_SIGNUP_DB_PATH = os.path.join(BASE_DIR, "mcp_signup.db")
+USER_DATABASES_DIR = os.path.join(BASE_DIR, "user_databases")
+CUSTOMER_SUPPORT_DB_PATH = os.path.join(BASE_DIR, "customer_support.db")
 
 app.add_middleware(
     CORSMiddleware,
@@ -59,10 +61,63 @@ class SocialPostRequest(BaseModel):
     audience: str | None = None
     tone: str | None = None
 
+
+class SimpleChatRequest(BaseModel):
+    message: str
+    history: list[dict] | None = None
+
+
 class McpSignupRequest(BaseModel):
     name: str
     email: str
     password: str
+
+class DbFieldSpec(BaseModel):
+    name: str
+    type: str
+
+
+class DbBuilderRequest(BaseModel):
+    db_type: str
+    db_name: str
+    use_case: str | None = None
+    entity_name: str
+    fields: list[DbFieldSpec]
+    sample: dict
+
+
+class DbBuilderChatRequest(BaseModel):
+    conversation_id: str | None = None
+    message: str
+
+
+class SupportHandoffRequest(BaseModel):
+    order_number: str | None = None
+    customer_name: str | None = None
+    issue: str
+    transcript: list[dict] | None = None
+
+
+class SupportHumanMessageRequest(BaseModel):
+    ticket_id: str
+    message: str
+    sender: str | None = "customer"
+
+
+class SupportOrderActionRequest(BaseModel):
+    ticket_id: str | None = None
+    note: str | None = None
+
+
+class SupportTicketUpdateRequest(BaseModel):
+    status: str | None = None
+    assigned_to: str | None = None
+    priority: str | None = None
+    resolution: str | None = None
+    internal_note: str | None = None
+
+
+DB_BUILDER_CONVERSATIONS: dict[str, dict] = {}
 
 SUPPORT_KNOWLEDGE_BASE = [
     {
@@ -116,6 +171,89 @@ SUPPORT_KNOWLEDGE_BASE = [
             "Once the rider is assigned, contact options may be shown in the app. Support should avoid sharing personal numbers directly and "
             "should encourage customers to use in-app call or chat tools for privacy and faster coordination."
         ),
+    },
+]
+
+SUPPORT_SAMPLE_ORDERS = [
+    {
+        "order_number": "FD1001",
+        "customer_name": "Riya Sharma",
+        "restaurant": "Biryani Bowl",
+        "items": "Paneer biryani, masala chaas",
+        "order_status": "Delayed",
+        "issue_status": "Restaurant is still finishing packing; rider is waiting near pickup.",
+        "payment_status": "Paid by UPI",
+        "refund_status": "Not initiated",
+        "rider_status": "Rider assigned and waiting at restaurant",
+        "eta": "15 minutes",
+        "total_amount": 348.00,
+        "delivery_address": "Green Park, Delhi",
+        "last_update": "2026-04-07 15:05 IST",
+        "support_note": "Apologize, share ETA, monitor delay, and offer escalation if delay crosses 20 minutes.",
+    },
+    {
+        "order_number": "FD1002",
+        "customer_name": "Arjun Mehta",
+        "restaurant": "Burger House",
+        "items": "Classic burger meal, peri peri fries",
+        "order_status": "Delivered",
+        "issue_status": "Customer reported missing peri peri fries.",
+        "payment_status": "Paid by card",
+        "refund_status": "Partial refund approved for missing item",
+        "rider_status": "Delivered by rider",
+        "eta": "Delivered",
+        "total_amount": 429.00,
+        "delivery_address": "Saket, Delhi",
+        "last_update": "2026-04-07 13:40 IST",
+        "support_note": "Apologize for missing item, confirm refund for fries, and share card refund timeline.",
+    },
+    {
+        "order_number": "FD1003",
+        "customer_name": "Kavya Nair",
+        "restaurant": "Dosa Corner",
+        "items": "Masala dosa, filter coffee",
+        "order_status": "Preparing",
+        "issue_status": "Customer asked for cancellation after preparation started.",
+        "payment_status": "Cash on delivery",
+        "refund_status": "No refund needed",
+        "rider_status": "Rider not assigned yet",
+        "eta": "22 minutes",
+        "total_amount": 215.00,
+        "delivery_address": "Lajpat Nagar, Delhi",
+        "last_update": "2026-04-07 14:15 IST",
+        "support_note": "Explain cancellation may be blocked because preparation started; offer to check feasibility.",
+    },
+    {
+        "order_number": "FD1004",
+        "customer_name": "Aman Verma",
+        "restaurant": "Pizza Palace",
+        "items": "Farmhouse pizza, garlic bread",
+        "order_status": "Payment failed",
+        "issue_status": "Payment deducted but order was not confirmed.",
+        "payment_status": "Deducted, reversal pending",
+        "refund_status": "Auto reversal expected within bank timeline",
+        "rider_status": "No rider assigned",
+        "eta": "No active delivery",
+        "total_amount": 612.00,
+        "delivery_address": "Dwarka, Delhi",
+        "last_update": "2026-04-07 12:25 IST",
+        "support_note": "Explain that the order is not active and the deducted amount should reverse automatically.",
+    },
+    {
+        "order_number": "FD1005",
+        "customer_name": "Priya Singh",
+        "restaurant": "Curry Express",
+        "items": "Dal makhani, butter naan",
+        "order_status": "In transit",
+        "issue_status": "Customer requested address change after pickup.",
+        "payment_status": "Paid by wallet",
+        "refund_status": "Not initiated",
+        "rider_status": "Rider is on the way to original address",
+        "eta": "9 minutes",
+        "total_amount": 286.00,
+        "delivery_address": "Karol Bagh, Delhi",
+        "last_update": "2026-04-07 15:20 IST",
+        "support_note": "Explain address change is not guaranteed after pickup; route to human support if urgent.",
     },
 ]
 
@@ -372,6 +510,642 @@ def load_support_knowledge_base():
     return records
 
 
+def ensure_customer_support_db():
+    with sqlite3.connect(CUSTOMER_SUPPORT_DB_PATH) as connection:
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS support_orders (
+                order_number TEXT PRIMARY KEY,
+                customer_name TEXT NOT NULL,
+                restaurant TEXT NOT NULL,
+                items TEXT NOT NULL,
+                order_status TEXT NOT NULL,
+                issue_status TEXT NOT NULL,
+                payment_status TEXT NOT NULL,
+                refund_status TEXT NOT NULL,
+                rider_status TEXT NOT NULL,
+                eta TEXT NOT NULL,
+                total_amount REAL NOT NULL,
+                delivery_address TEXT NOT NULL,
+                last_update TEXT NOT NULL,
+                support_note TEXT NOT NULL
+            )
+            """
+        )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS human_handoffs (
+                ticket_id TEXT PRIMARY KEY,
+                order_number TEXT,
+                customer_name TEXT,
+                issue TEXT NOT NULL,
+                transcript TEXT,
+                status TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            )
+            """
+        )
+        ensure_sqlite_column(connection, "human_handoffs", "priority", "TEXT NOT NULL DEFAULT 'Normal'")
+        ensure_sqlite_column(connection, "human_handoffs", "assigned_to", "TEXT")
+        ensure_sqlite_column(connection, "human_handoffs", "sla_due_at", "TEXT")
+        ensure_sqlite_column(connection, "human_handoffs", "updated_at", "TEXT")
+        ensure_sqlite_column(connection, "human_handoffs", "resolution", "TEXT")
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS human_handoff_messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ticket_id TEXT NOT NULL,
+                sender TEXT NOT NULL,
+                message TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY(ticket_id) REFERENCES human_handoffs(ticket_id)
+            )
+            """
+        )
+
+        for order in SUPPORT_SAMPLE_ORDERS:
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO support_orders (
+                    order_number, customer_name, restaurant, items, order_status, issue_status,
+                    payment_status, refund_status, rider_status, eta, total_amount,
+                    delivery_address, last_update, support_note
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    order["order_number"],
+                    order["customer_name"],
+                    order["restaurant"],
+                    order["items"],
+                    order["order_status"],
+                    order["issue_status"],
+                    order["payment_status"],
+                    order["refund_status"],
+                    order["rider_status"],
+                    order["eta"],
+                    order["total_amount"],
+                    order["delivery_address"],
+                    order["last_update"],
+                    order["support_note"],
+                ),
+            )
+        connection.commit()
+
+
+def ensure_sqlite_column(connection, table_name: str, column_name: str, definition: str):
+    existing_columns = {
+        row[1]
+        for row in connection.execute(f"PRAGMA table_info({table_name})").fetchall()
+    }
+    if column_name not in existing_columns:
+        connection.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {definition}")
+
+
+def support_row_to_dict(row):
+    if row is None:
+        return None
+    return {key: row[key] for key in row.keys()}
+
+
+def normalize_order_number(value: str):
+    return re.sub(r"[^A-Z0-9]", "", (value or "").upper())
+
+
+def extract_order_number(text: str):
+    normalized_text = (text or "").upper()
+    prefixed = re.search(r"\b(?:FD|ORD|SWG)[-\s]?\d{3,8}\b", normalized_text)
+    if prefixed:
+        return normalize_order_number(prefixed.group(0))
+
+    plain = re.search(r"\b\d{4,8}\b", normalized_text)
+    if plain:
+        return plain.group(0)
+
+    return None
+
+
+def lookup_support_order(order_number: str | None):
+    if not order_number:
+        return None
+
+    ensure_customer_support_db()
+    normalized = normalize_order_number(order_number)
+    with sqlite3.connect(CUSTOMER_SUPPORT_DB_PATH) as connection:
+        connection.row_factory = sqlite3.Row
+        row = connection.execute(
+            """
+            SELECT * FROM support_orders
+            WHERE REPLACE(REPLACE(UPPER(order_number), '-', ''), ' ', '') = ?
+            """,
+            (normalized,),
+        ).fetchone()
+        if row is None and normalized.isdigit():
+            row = connection.execute(
+                """
+                SELECT * FROM support_orders
+                WHERE REPLACE(REPLACE(UPPER(order_number), '-', ''), ' ', '') LIKE ?
+                """,
+                (f"%{normalized}",),
+            ).fetchone()
+
+    return support_row_to_dict(row)
+
+
+def list_support_demo_orders():
+    ensure_customer_support_db()
+    with sqlite3.connect(CUSTOMER_SUPPORT_DB_PATH) as connection:
+        connection.row_factory = sqlite3.Row
+        rows = connection.execute(
+            """
+            SELECT *
+            FROM support_orders
+            ORDER BY order_number
+            """
+        ).fetchall()
+    return [support_row_to_dict(row) for row in rows]
+
+
+def is_order_specific_question(question: str):
+    question_text = (question or "").lower()
+    keywords = {
+        "order", "late", "delay", "delayed", "missing", "refund", "cancel",
+        "payment", "deducted", "address", "rider", "delivery", "item", "status"
+    }
+    return any(keyword in question_text for keyword in keywords)
+
+
+def build_order_support_answer(question: str, order: dict, matches):
+    policy_line = ""
+    if matches:
+        policy_sentences = sentence_split(matches[0]["text"])
+        if policy_sentences:
+            policy_line = f" Policy note: {policy_sentences[0]}"
+
+    return (
+        f"Order update for {order['order_number']}: customer name {order['customer_name']}, restaurant {order['restaurant']}. "
+        f"Backend status: {order['order_status']}. Issue recorded: {order['issue_status']} "
+        f"ETA: {order['eta']}. Payment status: {order['payment_status']}. Refund status: {order['refund_status']}. "
+        f"Support action: {order['support_note']}{policy_line} You can also choose Chat with support agent to create a human support ticket for this order."
+    )
+
+
+def format_customer_message_for_representative(message: str, order_number: str | None = None):
+    cleaned = re.sub(r"\s+", " ", (message or "").strip())
+    if not cleaned:
+        cleaned = "Customer requested support assistance."
+
+    detected_order = normalize_order_number(order_number or extract_order_number(cleaned) or "")
+    lowered = cleaned.lower()
+
+    if "human" in lowered or "representative" in lowered or "agent" in lowered:
+        issue_type = "Customer requested human support assistance"
+        detail = "Please review the ticket and continue the conversation with the customer."
+    elif any(word in lowered for word in ("late", "delay", "delayed", "eta", "where is")):
+        issue_type = "Customer requested an update for a delayed order"
+        detail = "Customer is asking for the current order status and revised delivery ETA."
+    elif any(word in lowered for word in ("missing", "wrong", "incorrect", "spilled", "damaged")):
+        issue_type = "Customer reported an item or order quality issue"
+        detail = "Customer is asking support to review the affected items and provide an appropriate resolution."
+    elif any(word in lowered for word in ("refund", "money", "amount", "charged")):
+        issue_type = "Customer requested payment or refund assistance"
+        detail = "Customer is asking support to review the payment/refund status and explain the next steps."
+    elif any(word in lowered for word in ("payment", "deducted", "upi", "card", "wallet")):
+        issue_type = "Customer reported a payment confirmation issue"
+        detail = "Customer is asking support to verify whether the payment/order confirmation is successful."
+    elif any(word in lowered for word in ("cancel", "cancellation")):
+        issue_type = "Customer requested cancellation assistance"
+        detail = "Customer is asking support to check whether cancellation is still possible for the order."
+    elif "address" in lowered:
+        issue_type = "Customer requested delivery address support"
+        detail = "Customer is asking support to check whether the delivery address can be updated."
+    else:
+        issue_type = "Customer provided additional support information"
+        detail = "Please review the saved conversation transcript for the complete customer context."
+
+    order_part = f" for order {detected_order}" if detected_order else ""
+    return f"{issue_type}{order_part}. {detail}"
+
+
+def infer_ticket_priority(message: str, order: dict | None = None):
+    text = (message or "").lower()
+    order_status = (order or {}).get("order_status", "").lower()
+    issue_status = (order or {}).get("issue_status", "").lower()
+
+    if any(word in text for word in ("payment deducted", "deducted", "refund", "money", "charged")) or "payment failed" in order_status:
+        return "High"
+    if any(word in text for word in ("cancel", "address", "wrong address")):
+        return "High"
+    if any(word in text for word in ("late", "delay", "delayed", "rider")) or "delayed" in order_status or "delayed" in issue_status:
+        return "High"
+    if any(word in text for word in ("missing", "wrong", "incorrect", "spilled", "damaged")):
+        return "Normal"
+    return "Normal"
+
+
+def calculate_sla_due_at(priority: str):
+    priority_minutes = {
+        "Urgent": 15,
+        "High": 30,
+        "Normal": 60,
+        "Low": 120,
+    }
+    minutes = priority_minutes.get(priority, 60)
+    return (datetime.datetime.utcnow() + datetime.timedelta(minutes=minutes)).isoformat(timespec="seconds") + "Z"
+
+
+def normalize_ticket_status(status: str | None):
+    cleaned = (status or "").strip().lower().replace(" ", "_")
+    allowed = {"waiting_for_representative", "in_progress", "resolved", "closed"}
+    if cleaned not in allowed:
+        raise ValueError("Invalid ticket status.")
+    return cleaned
+
+
+def normalize_ticket_priority(priority: str | None):
+    cleaned = (priority or "").strip().title()
+    allowed = {"Low", "Normal", "High", "Urgent"}
+    if cleaned not in allowed:
+        raise ValueError("Invalid ticket priority.")
+    return cleaned
+
+
+def create_support_handoff(payload: SupportHandoffRequest):
+    ensure_customer_support_db()
+    cleaned_order_number = normalize_order_number(payload.order_number or "") or None
+    order = lookup_support_order(cleaned_order_number) if cleaned_order_number else None
+    customer_name = (payload.customer_name or "").strip()
+    if not customer_name and order:
+        customer_name = order["customer_name"]
+
+    created_at = datetime.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    ticket_id = f"CSR-{datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{os.urandom(3).hex().upper()}"
+    transcript_json = json.dumps(payload.transcript or [], ensure_ascii=True)
+    professional_issue = format_customer_message_for_representative(payload.issue, cleaned_order_number)
+    priority = infer_ticket_priority(payload.issue, order)
+    sla_due_at = calculate_sla_due_at(priority)
+
+    with sqlite3.connect(CUSTOMER_SUPPORT_DB_PATH) as connection:
+        connection.execute(
+            """
+            INSERT INTO human_handoffs (
+                ticket_id, order_number, customer_name, issue, transcript, status,
+                priority, assigned_to, sla_due_at, updated_at, resolution, created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                ticket_id,
+                cleaned_order_number,
+                customer_name or None,
+                professional_issue,
+                transcript_json,
+                "waiting_for_representative",
+                priority,
+                None,
+                sla_due_at,
+                created_at,
+                None,
+                created_at,
+            ),
+        )
+        connection.execute(
+            """
+            INSERT INTO human_handoff_messages (ticket_id, sender, message, created_at)
+            VALUES (?, ?, ?, ?)
+            """,
+            (ticket_id, "customer", professional_issue, created_at),
+        )
+        connection.commit()
+
+    return {
+        "success": True,
+        "ticket_id": ticket_id,
+        "status": "waiting_for_representative",
+        "priority": priority,
+        "sla_due_at": sla_due_at,
+        "order": order,
+        "message": (
+            f"Your human support request is created. Ticket {ticket_id} is waiting for a support agent. "
+            "You can keep typing here and your messages will be saved to this ticket."
+        ),
+    }
+
+
+def add_support_human_message(payload: SupportHumanMessageRequest):
+    ensure_customer_support_db()
+    ticket_id = (payload.ticket_id or "").strip()
+    message = (payload.message or "").strip()
+    sender = (payload.sender or "customer").strip().lower()
+    if sender not in {"customer", "representative", "internal_note"}:
+        sender = "customer"
+
+    if not ticket_id or not message:
+        return {"success": False, "error": "Ticket id and message are required."}
+
+    created_at = datetime.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    with sqlite3.connect(CUSTOMER_SUPPORT_DB_PATH) as connection:
+        existing = connection.execute(
+            "SELECT ticket_id, order_number FROM human_handoffs WHERE ticket_id = ?",
+            (ticket_id,),
+        ).fetchone()
+        if not existing:
+            return {"success": False, "error": "Human support ticket not found."}
+        if sender == "customer":
+            message = format_customer_message_for_representative(message, existing[1])
+
+        connection.execute(
+            """
+            INSERT INTO human_handoff_messages (ticket_id, sender, message, created_at)
+            VALUES (?, ?, ?, ?)
+            """,
+            (ticket_id, sender, message, created_at),
+        )
+        connection.execute(
+            "UPDATE human_handoffs SET updated_at = ? WHERE ticket_id = ?",
+            (created_at, ticket_id),
+        )
+        connection.commit()
+
+    return {
+        "success": True,
+        "ticket_id": ticket_id,
+        "message": "Message saved to the human support-agent ticket.",
+    }
+
+
+def update_support_ticket(ticket_id: str, payload: SupportTicketUpdateRequest):
+    ensure_customer_support_db()
+    ticket_id = (ticket_id or "").strip()
+    if not ticket_id:
+        return {"success": False, "error": "Ticket id is required."}
+
+    updates = []
+    params = []
+    message_to_append = None
+    updated_at = datetime.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+
+    if payload.status is not None:
+        status = normalize_ticket_status(payload.status)
+        updates.append("status = ?")
+        params.append(status)
+        if status == "in_progress":
+            message_to_append = "Ticket status updated: support agent is reviewing this case."
+        elif status == "resolved":
+            message_to_append = "Ticket status updated: this support case has been marked resolved."
+        elif status == "closed":
+            message_to_append = "Ticket status updated: this support case has been closed."
+
+    if payload.assigned_to is not None:
+        assigned_to = payload.assigned_to.strip() or None
+        updates.append("assigned_to = ?")
+        params.append(assigned_to)
+        if assigned_to:
+            message_to_append = f"Ticket assigned to support agent {assigned_to}."
+
+    if payload.priority is not None:
+        priority = normalize_ticket_priority(payload.priority)
+        updates.append("priority = ?")
+        params.append(priority)
+        updates.append("sla_due_at = ?")
+        params.append(calculate_sla_due_at(priority))
+
+    if payload.resolution is not None:
+        resolution = payload.resolution.strip() or None
+        updates.append("resolution = ?")
+        params.append(resolution)
+
+    updates.append("updated_at = ?")
+    params.append(updated_at)
+    params.append(ticket_id)
+
+    with sqlite3.connect(CUSTOMER_SUPPORT_DB_PATH) as connection:
+        existing = connection.execute(
+            "SELECT ticket_id FROM human_handoffs WHERE ticket_id = ?",
+            (ticket_id,),
+        ).fetchone()
+        if not existing:
+            return {"success": False, "error": "Human support ticket not found."}
+
+        connection.execute(
+            f"UPDATE human_handoffs SET {', '.join(updates)} WHERE ticket_id = ?",
+            tuple(params),
+        )
+
+        internal_note = (payload.internal_note or "").strip()
+        if internal_note:
+            connection.execute(
+                """
+                INSERT INTO human_handoff_messages (ticket_id, sender, message, created_at)
+                VALUES (?, ?, ?, ?)
+                """,
+                (ticket_id, "internal_note", internal_note, updated_at),
+            )
+
+        if message_to_append:
+            connection.execute(
+                """
+                INSERT INTO human_handoff_messages (ticket_id, sender, message, created_at)
+                VALUES (?, ?, ?, ?)
+                """,
+                (ticket_id, "representative", message_to_append, updated_at),
+            )
+
+        connection.commit()
+
+    return {
+        "success": True,
+        "ticket": get_support_handoff_messages(ticket_id),
+    }
+
+
+def current_support_timestamp():
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M IST")
+
+
+def update_support_order_action(order_number: str, action: str, ticket_id: str | None = None, note: str | None = None):
+    ensure_customer_support_db()
+    normalized_order_number = normalize_order_number(order_number)
+    order = lookup_support_order(normalized_order_number)
+    if not order:
+        return {"success": False, "error": "Order not found in the support database."}
+
+    action = (action or "").strip().lower()
+    timestamp = current_support_timestamp()
+    note_text = (note or "").strip()
+
+    if action == "cancel":
+        paid_order = "cash on delivery" not in (order.get("payment_status") or "").lower()
+        updates = {
+            "order_status": "Cancelled",
+            "issue_status": "Order cancelled by support agent from representative inbox.",
+            "refund_status": "Refund initiated after cancellation" if paid_order else "No refund needed for cash on delivery",
+            "rider_status": "Delivery stopped after support cancellation",
+            "eta": "Cancelled",
+            "last_update": timestamp,
+            "support_note": note_text or "Cancellation completed by support agent. Inform the customer that the order has been cancelled and any eligible refund is being processed.",
+        }
+        action_message = f"Support action completed: order {order['order_number']} was cancelled."
+    elif action == "refund":
+        updates = {
+            "order_status": order["order_status"],
+            "issue_status": "Refund initiated by support agent after ticket review.",
+            "refund_status": "Refund initiated by support agent",
+            "rider_status": order["rider_status"],
+            "eta": order["eta"],
+            "last_update": timestamp,
+            "support_note": note_text or "Refund initiated by support agent. Share the expected refund timeline based on the customer's payment method.",
+        }
+        action_message = f"Support action completed: refund was initiated for order {order['order_number']}."
+    else:
+        return {"success": False, "error": "Unsupported action. Use cancel or refund."}
+
+    with sqlite3.connect(CUSTOMER_SUPPORT_DB_PATH) as connection:
+        connection.execute(
+            """
+            UPDATE support_orders
+            SET order_status = ?,
+                issue_status = ?,
+                refund_status = ?,
+                rider_status = ?,
+                eta = ?,
+                last_update = ?,
+                support_note = ?
+            WHERE REPLACE(REPLACE(UPPER(order_number), '-', ''), ' ', '') = ?
+            """,
+            (
+                updates["order_status"],
+                updates["issue_status"],
+                updates["refund_status"],
+                updates["rider_status"],
+                updates["eta"],
+                updates["last_update"],
+                updates["support_note"],
+                normalized_order_number,
+            ),
+        )
+
+        if ticket_id:
+            existing = connection.execute(
+                "SELECT ticket_id FROM human_handoffs WHERE ticket_id = ?",
+                (ticket_id,),
+            ).fetchone()
+            if existing:
+                action_time = datetime.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+                connection.execute(
+                    """
+                    INSERT INTO human_handoff_messages (ticket_id, sender, message, created_at)
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    (ticket_id, "representative", action_message, action_time),
+                )
+                connection.execute(
+                    """
+                    UPDATE human_handoffs
+                    SET status = ?, updated_at = ?
+                    WHERE ticket_id = ? AND status = ?
+                    """,
+                    ("in_progress", action_time, ticket_id, "waiting_for_representative"),
+                )
+        connection.commit()
+
+    updated_order = lookup_support_order(normalized_order_number)
+    return {
+        "success": True,
+        "action": action,
+        "order": updated_order,
+        "message": action_message,
+    }
+
+
+def list_support_handoffs():
+    ensure_customer_support_db()
+    with sqlite3.connect(CUSTOMER_SUPPORT_DB_PATH) as connection:
+        connection.row_factory = sqlite3.Row
+        tickets = connection.execute(
+            """
+            SELECT ticket_id, order_number, customer_name, issue, status, priority,
+                   assigned_to, sla_due_at, updated_at, resolution, created_at
+            FROM human_handoffs
+            ORDER BY created_at DESC
+            """
+        ).fetchall()
+        messages = connection.execute(
+            """
+            SELECT ticket_id, sender, message, created_at
+            FROM human_handoff_messages
+            ORDER BY created_at ASC
+            """
+        ).fetchall()
+
+    grouped_messages = {}
+    for message in messages:
+        message_dict = support_row_to_dict(message)
+        grouped_messages.setdefault(message_dict["ticket_id"], []).append(message_dict)
+
+    result = []
+    for ticket in tickets:
+        ticket_dict = support_row_to_dict(ticket)
+        ticket_dict["messages"] = grouped_messages.get(ticket_dict["ticket_id"], [])
+        ticket_dict["order"] = lookup_support_order(ticket_dict.get("order_number"))
+        result.append(ticket_dict)
+    return result
+
+
+def get_support_handoff_messages(ticket_id: str):
+    ensure_customer_support_db()
+    with sqlite3.connect(CUSTOMER_SUPPORT_DB_PATH) as connection:
+        connection.row_factory = sqlite3.Row
+        ticket = connection.execute(
+            """
+            SELECT ticket_id, order_number, customer_name, issue, status, priority,
+                   assigned_to, sla_due_at, updated_at, resolution, created_at
+            FROM human_handoffs
+            WHERE ticket_id = ?
+            """,
+            (ticket_id,),
+        ).fetchone()
+        if not ticket:
+            return None
+
+        messages = connection.execute(
+            """
+            SELECT id, ticket_id, sender, message, created_at
+            FROM human_handoff_messages
+            WHERE ticket_id = ?
+            ORDER BY id ASC
+            """,
+            (ticket_id,),
+        ).fetchall()
+
+    ticket_dict = support_row_to_dict(ticket)
+    ticket_dict["messages"] = [support_row_to_dict(message) for message in messages]
+    ticket_dict["order"] = lookup_support_order(ticket_dict.get("order_number"))
+    return ticket_dict
+
+
+def build_support_handoff_stats(handoffs):
+    stats = {
+        "total": len(handoffs),
+        "waiting_for_representative": 0,
+        "in_progress": 0,
+        "resolved": 0,
+        "closed": 0,
+        "high_priority": 0,
+        "unassigned": 0,
+    }
+    for ticket in handoffs:
+        status = ticket.get("status") or "waiting_for_representative"
+        if status in stats:
+            stats[status] += 1
+        if ticket.get("priority") in {"High", "Urgent"}:
+            stats["high_priority"] += 1
+        if not ticket.get("assigned_to"):
+            stats["unassigned"] += 1
+    return stats
+
+
+
 def build_support_fallback_answer(question: str, matches):
     if not matches:
         return (
@@ -455,6 +1229,269 @@ def create_mcp_signup(payload: McpSignupRequest):
         connection.commit()
 
     return {"success": True, "message": "Account created successfully."}
+
+def ensure_user_databases_dir():
+    os.makedirs(USER_DATABASES_DIR, exist_ok=True)
+
+
+_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def sanitize_identifier(value: str, label: str):
+    cleaned = (value or "").strip()
+    if not cleaned or not _IDENTIFIER_RE.match(cleaned):
+        raise ValueError(f"Invalid {label}. Use letters, numbers, underscore, and do not start with a number.")
+    return cleaned
+
+
+def map_sqlite_type(type_name: str):
+    t = (type_name or "").strip().lower()
+    if t in {"text", "string", "str"}:
+        return "TEXT"
+    if t in {"int", "integer"}:
+        return "INTEGER"
+    if t in {"float", "double", "real", "number"}:
+        return "REAL"
+    if t in {"bool", "boolean"}:
+        return "INTEGER"
+    if t in {"date", "datetime", "timestamp"}:
+        return "TEXT"
+    return "TEXT"
+
+
+def create_sqlite_database(payload: DbBuilderRequest):
+    ensure_user_databases_dir()
+    db_name = sanitize_identifier(payload.db_name, "database name")
+    table_name = sanitize_identifier(payload.entity_name, "table name")
+
+    columns = []
+    field_specs = []
+    seen = set()
+    for field in payload.fields:
+        field_name = sanitize_identifier(field.name, "field name")
+        if field_name in seen:
+            raise ValueError(f"Duplicate field name: {field_name}")
+        seen.add(field_name)
+        sqlite_type = map_sqlite_type(field.type)
+        columns.append(f"{field_name} {sqlite_type}")
+        field_specs.append((field_name, sqlite_type))
+
+    if not field_specs:
+        raise ValueError("Provide at least one field.")
+
+    db_path = os.path.join(USER_DATABASES_DIR, f"{db_name}.db")
+
+    with sqlite3.connect(db_path) as connection:
+        connection.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (id INTEGER PRIMARY KEY AUTOINCREMENT, {', '.join(columns)})")
+
+        insert_fields = [name for name, _ in field_specs]
+        placeholders = ", ".join(["?"] * len(insert_fields))
+        values = []
+        for field_name, field_type in field_specs:
+            raw_value = payload.sample.get(field_name)
+            if field_type == "INTEGER":
+                if raw_value is None or raw_value == "":
+                    values.append(None)
+                else:
+                    if isinstance(raw_value, str) and raw_value.strip().lower() in {"true", "false", "yes", "no"}:
+                        values.append(1 if raw_value.strip().lower() in {"true", "yes"} else 0)
+                    else:
+                        values.append(int(raw_value))
+            elif field_type == "REAL":
+                if raw_value is None or raw_value == "":
+                    values.append(None)
+                else:
+                    values.append(float(raw_value))
+            else:
+                values.append(None if raw_value is None else str(raw_value))
+
+        connection.execute(
+            f"INSERT INTO {table_name} ({', '.join(insert_fields)}) VALUES ({placeholders})",
+            tuple(values),
+        )
+        connection.commit()
+
+        row = connection.execute(f"SELECT * FROM {table_name} ORDER BY id DESC LIMIT 1").fetchone()
+
+    return {
+        "db_type": "sqlite",
+        "db_path": db_path,
+        "table": table_name,
+        "inserted_row": row,
+    }
+
+
+def create_mongo_database(payload: DbBuilderRequest):
+    db_name = sanitize_identifier(payload.db_name, "database name")
+    collection_name = sanitize_identifier(payload.entity_name, "collection name")
+
+    field_names = []
+    seen = set()
+    for field in payload.fields:
+        field_name = sanitize_identifier(field.name, "field name")
+        if field_name in seen:
+            raise ValueError(f"Duplicate field name: {field_name}")
+        seen.add(field_name)
+        field_names.append(field_name)
+
+    if not field_names:
+        raise ValueError("Provide at least one field.")
+
+    document = {name: payload.sample.get(name) for name in field_names}
+    if payload.use_case and payload.use_case.strip():
+        document["_use_case"] = payload.use_case.strip()
+
+    client = pymongo.MongoClient("mongodb://localhost:27017/", serverSelectionTimeoutMS=2500)
+    client.admin.command("ping")
+    db = client[db_name]
+    collection = db[collection_name]
+    result = collection.insert_one(document)
+
+    return {
+        "db_type": "mongodb",
+        "database": db_name,
+        "collection": collection_name,
+        "inserted_id": str(result.inserted_id),
+        "inserted_document": document,
+    }
+
+
+def create_json_document_store(payload: DbBuilderRequest):
+    """
+    Local Mongo-style fallback when a MongoDB server is not available.
+    Writes a small JSON file under ./user_databases.
+    """
+    ensure_user_databases_dir()
+    db_name = sanitize_identifier(payload.db_name, "database name")
+    collection_name = sanitize_identifier(payload.entity_name, "collection name")
+
+    field_names = []
+    seen = set()
+    for field in payload.fields:
+        field_name = sanitize_identifier(field.name, "field name")
+        if field_name in seen:
+            raise ValueError(f"Duplicate field name: {field_name}")
+        seen.add(field_name)
+        field_names.append(field_name)
+
+    document = {name: payload.sample.get(name) for name in field_names}
+    if payload.use_case and payload.use_case.strip():
+        document["_use_case"] = payload.use_case.strip()
+    document["_created_at"] = datetime.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+
+    store_path = os.path.join(USER_DATABASES_DIR, f"{db_name}__{collection_name}.json")
+    existing = []
+    if os.path.exists(store_path):
+        try:
+            with open(store_path, "r", encoding="utf-8") as handle:
+                existing = json.load(handle) or []
+        except Exception:
+            existing = []
+
+    existing.append(document)
+    with open(store_path, "w", encoding="utf-8") as handle:
+        json.dump(existing, handle, indent=2, ensure_ascii=True)
+
+    return {
+        "db_type": "json-document-store",
+        "store_path": store_path,
+        "database": db_name,
+        "collection": collection_name,
+        "inserted_document": document,
+    }
+
+
+def _new_conversation_id():
+    return os.urandom(12).hex()
+
+
+def _suggest_identifier(value: str):
+    cleaned = (value or "").strip()
+    cleaned = re.sub(r"[^A-Za-z0-9_]+", "_", cleaned)
+    cleaned = re.sub(r"_{2,}", "_", cleaned).strip("_")
+    if not cleaned:
+        return None
+    if cleaned[0].isdigit():
+        cleaned = "_" + cleaned
+    return cleaned if _IDENTIFIER_RE.match(cleaned) else None
+
+
+def _parse_db_type(message: str):
+    m = (message or "").lower()
+    if "mongo" in m:
+        return "mongodb"
+    if "sqlite" in m or "sql lite" in m:
+        return "sqlite"
+    if "postgres" in m or "postgresql" in m:
+        return "sqlite"
+    if "mysql" in m:
+        return "sqlite"
+    return None
+
+
+def _parse_fields_spec(message: str):
+    """
+    Accepts: "name:text, price:real, is_paid:boolean"
+    Returns: list[{name,type}], errors(list[str])
+    """
+    raw = (message or "").strip()
+    if not raw:
+        return [], ["Please enter at least one field."]
+
+    parts = [p.strip() for p in re.split(r"[,\n]+", raw) if p.strip()]
+    fields = []
+    errors = []
+    for part in parts:
+        match = re.match(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*[:\-]\s*([A-Za-z0-9_]+)\s*$", part)
+        if not match:
+            errors.append(f"Could not parse: '{part}'. Use format name:type (example: total:real).")
+            continue
+        fields.append({"name": match.group(1), "type": match.group(2)})
+
+    if not fields and not errors:
+        errors.append("Please enter fields in format name:type, separated by commas.")
+
+    return fields, errors
+
+
+def _ensure_db_builder_state(conversation_id: str):
+    if conversation_id not in DB_BUILDER_CONVERSATIONS:
+        DB_BUILDER_CONVERSATIONS[conversation_id] = {
+            "stage": "db_type",
+            "db_type": None,
+            "db_name": None,
+            "use_case": None,
+            "entity_name": None,
+            "fields": [],
+            "sample": {},
+            "sample_index": 0,
+            "updated_at": datetime.datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        }
+    return DB_BUILDER_CONVERSATIONS[conversation_id]
+
+
+def _db_builder_next_prompt(state: dict):
+    stage = state.get("stage")
+    if stage == "db_type":
+        return "What kind of database do you want to create? Type 'sqlite' or 'mongodb'."
+    if stage == "db_name":
+        return "What should we name the database? Use only letters, numbers, and underscore (example: swiggy_support)."
+    if stage == "use_case":
+        return "What is the use case? Example: 'Food delivery app orders and payments'."
+    if stage == "entity_name":
+        return "What is the main entity (table/collection) name? Example: orders or customers."
+    if stage == "fields":
+        return "List the fields for this entity in format name:type, separated by commas. Example: customer_name:text, total:real, created_at:date."
+    if stage == "sample":
+        fields = state.get("fields") or []
+        idx = int(state.get("sample_index") or 0)
+        if idx < len(fields):
+            field = fields[idx]
+            return f"Enter a sample value for '{field['name']}' ({field['type']})."
+        return "Creating your database and inserting the sample record..."
+    if stage == "done":
+        return "Done. Type 'restart' to create another database."
+    return "Type 'restart' to start again."
 
 
 def generate_excel_agent_response(question: str, sheet_data: str | None = None):
@@ -667,9 +1704,26 @@ def social_post_generator_page():
     return FileResponse(os.path.join(BASE_DIR, "social_post_generator.html"))
 
 
+@app.get("/simple-chatbot")
+def simple_chatbot_page():
+    return FileResponse(os.path.join(BASE_DIR, "simple_chatbot.html"))
+
+
 @app.get("/customer-support")
 def customer_support_page():
+    ensure_customer_support_db()
     return FileResponse(os.path.join(BASE_DIR, "customer_support_representative.html"))
+
+
+@app.get("/support-representative")
+def support_representative_page():
+    ensure_customer_support_db()
+    return FileResponse(os.path.join(BASE_DIR, "support_representative_inbox.html"))
+
+
+@app.get("/db-builder")
+def db_builder_page():
+    return FileResponse(os.path.join(BASE_DIR, "db_builder.html"))
 
 
 @app.get("/copilot-config")
@@ -722,17 +1776,359 @@ def rag_query(payload: RagQuestion):
 def support_chat_query(payload: RagQuestion):
     records = load_support_knowledge_base()
     matches = retrieve_rag_matches(payload.question, records)
-    answer = generate_support_answer(payload.question, matches)
+    extracted_order_number = extract_order_number(payload.question)
+    order = lookup_support_order(extracted_order_number)
+
+    if order:
+        answer = build_order_support_answer(payload.question, order, matches)
+        mode = "order_lookup"
+    elif extracted_order_number:
+        answer = (
+            f"I could not find order {extracted_order_number} in the support database. "
+            "Please re-check the order number. For this demo, try FD1001, FD1002, FD1003, FD1004, or FD1005."
+        )
+        mode = "order_not_found"
+    elif is_order_specific_question(payload.question):
+        policy_answer = generate_support_answer(payload.question, matches)
+        answer = (
+            f"{policy_answer} To check the exact backend order data, please share your order number. "
+            "For this demo, you can try FD1001 for a delayed order, FD1002 for a missing item, FD1004 for payment deduction, or FD1005 for address change."
+        )
+        mode = "needs_order_number"
+    else:
+        answer = generate_support_answer(payload.question, matches)
+        mode = "knowledge_base"
+
     return {
         "question": payload.question,
         "answer": answer,
         "nlp_result": answer,
+        "mode": mode,
+        "order_number": extracted_order_number,
+        "order": order,
         "matches": matches,
         "knowledge_base": {
             "name": "food-delivery-support-kb",
             "record_count": len(records),
-        }
+        },
+        "support_database": {
+            "name": "customer-support-sqlite",
+            "path": CUSTOMER_SUPPORT_DB_PATH,
+        },
+        "human_handoff_available": True,
     }
+
+
+@app.get("/support-chat/orders")
+def support_chat_orders():
+    return {
+        "orders": list_support_demo_orders(),
+        "database": {
+            "name": "customer-support-sqlite",
+            "path": CUSTOMER_SUPPORT_DB_PATH,
+        },
+    }
+
+
+@app.post("/support-chat/orders/{order_number}/{action}")
+def support_chat_order_action(order_number: str, action: str, payload: SupportOrderActionRequest):
+    try:
+        return update_support_order_action(
+            order_number=order_number,
+            action=action,
+            ticket_id=payload.ticket_id,
+            note=payload.note,
+        )
+    except Exception as exc:
+        return {"success": False, "error": str(exc)}
+
+
+@app.post("/support-chat/handoff")
+def support_chat_handoff(payload: SupportHandoffRequest):
+    try:
+        if not payload.issue.strip():
+            return {"success": False, "error": "Please describe the issue before connecting to a support agent."}
+        return create_support_handoff(payload)
+    except Exception as exc:
+        return {"success": False, "error": str(exc)}
+
+
+@app.post("/support-chat/human-message")
+def support_chat_human_message(payload: SupportHumanMessageRequest):
+    try:
+        return add_support_human_message(payload)
+    except Exception as exc:
+        return {"success": False, "error": str(exc)}
+
+
+@app.get("/support-chat/handoffs")
+def support_chat_handoffs():
+    handoffs = list_support_handoffs()
+    return {
+        "handoffs": handoffs,
+        "stats": build_support_handoff_stats(handoffs),
+        "database": {
+            "name": "customer-support-sqlite",
+            "path": CUSTOMER_SUPPORT_DB_PATH,
+        },
+    }
+
+
+@app.post("/support-chat/handoffs/{ticket_id}/update")
+def support_chat_update_handoff(ticket_id: str, payload: SupportTicketUpdateRequest):
+    try:
+        return update_support_ticket(ticket_id, payload)
+    except Exception as exc:
+        return {"success": False, "error": str(exc)}
+
+
+@app.get("/support-chat/handoffs/{ticket_id}/messages")
+def support_chat_handoff_messages(ticket_id: str):
+    ticket = get_support_handoff_messages(ticket_id)
+    if not ticket:
+        return {"success": False, "error": "Human support ticket not found."}
+    return {"success": True, "ticket": ticket}
+
+
+@app.post("/db-builder/build")
+def db_builder_build(payload: DbBuilderRequest):
+    try:
+        db_type = (payload.db_type or "").strip().lower()
+        if db_type in {"sqlite", "postgres", "postgresql", "mysql"}:
+            return create_sqlite_database(payload)
+        if db_type in {"mongodb", "mongo"}:
+            try:
+                return create_mongo_database(payload)
+            except Exception as exc:
+                fallback = create_json_document_store(payload)
+                fallback["warning"] = f"MongoDB was not reachable at mongodb://localhost:27017. Saved a local JSON store instead. Details: {exc}"
+                return fallback
+        return {"error": "Unsupported db_type. Use 'sqlite' or 'mongodb'."}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/db-builder/chat")
+def db_builder_chat(payload: DbBuilderChatRequest):
+    raw_message = (payload.message or "").strip()
+    conversation_id = payload.conversation_id or ""
+    if not conversation_id:
+        conversation_id = _new_conversation_id()
+
+    if raw_message.lower() in {"restart", "reset"}:
+        DB_BUILDER_CONVERSATIONS.pop(conversation_id, None)
+
+    state = _ensure_db_builder_state(conversation_id)
+    state["updated_at"] = datetime.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+
+    if raw_message.lower() in {"start", ""} and state.get("stage") == "db_type":
+        return {
+            "conversation_id": conversation_id,
+            "stage": state["stage"],
+            "assistant": "Hi. I can help you design a small database (schema) and insert one sample record. " + _db_builder_next_prompt(state),
+            "state": {k: v for k, v in state.items() if k != "sample"},
+        }
+
+    stage = state.get("stage")
+
+    try:
+        if stage == "db_type":
+            parsed = _parse_db_type(raw_message)
+            if not parsed:
+                return {
+                    "conversation_id": conversation_id,
+                    "stage": state["stage"],
+                    "assistant": "I did not catch the database type. Please type 'sqlite' or 'mongodb'.",
+                    "state": {k: v for k, v in state.items() if k != "sample"},
+                }
+
+            state["db_type"] = parsed
+            state["stage"] = "db_name"
+            return {
+                "conversation_id": conversation_id,
+                "stage": state["stage"],
+                "assistant": f"Great, we will create a {parsed} database. " + _db_builder_next_prompt(state),
+                "state": {k: v for k, v in state.items() if k != "sample"},
+            }
+
+        if stage == "db_name":
+            try:
+                state["db_name"] = sanitize_identifier(raw_message, "database name")
+            except Exception:
+                suggestion = _suggest_identifier(raw_message)
+                if suggestion:
+                    return {
+                        "conversation_id": conversation_id,
+                        "stage": state["stage"],
+                        "assistant": f"That name is not valid. Try: {suggestion}",
+                        "state": {k: v for k, v in state.items() if k != "sample"},
+                    }
+                return {
+                    "conversation_id": conversation_id,
+                    "stage": state["stage"],
+                    "assistant": "Please use only letters, numbers, and underscore (example: swiggy_support).",
+                    "state": {k: v for k, v in state.items() if k != "sample"},
+                }
+
+            state["stage"] = "use_case"
+            return {
+                "conversation_id": conversation_id,
+                "stage": state["stage"],
+                "assistant": "Saved. " + _db_builder_next_prompt(state),
+                "state": {k: v for k, v in state.items() if k != "sample"},
+            }
+
+        if stage == "use_case":
+            state["use_case"] = raw_message
+            state["stage"] = "entity_name"
+            return {
+                "conversation_id": conversation_id,
+                "stage": state["stage"],
+                "assistant": "Nice. " + _db_builder_next_prompt(state),
+                "state": {k: v for k, v in state.items() if k != "sample"},
+            }
+
+        if stage == "entity_name":
+            try:
+                state["entity_name"] = sanitize_identifier(raw_message, "entity name")
+            except Exception:
+                suggestion = _suggest_identifier(raw_message)
+                if suggestion:
+                    return {
+                        "conversation_id": conversation_id,
+                        "stage": state["stage"],
+                        "assistant": f"That name is not valid. Try: {suggestion}",
+                        "state": {k: v for k, v in state.items() if k != "sample"},
+                    }
+                return {
+                    "conversation_id": conversation_id,
+                    "stage": state["stage"],
+                    "assistant": "Please use letters, numbers, and underscore only (example: orders).",
+                    "state": {k: v for k, v in state.items() if k != "sample"},
+                }
+
+            state["stage"] = "fields"
+            return {
+                "conversation_id": conversation_id,
+                "stage": state["stage"],
+                "assistant": "Great. " + _db_builder_next_prompt(state),
+                "state": {k: v for k, v in state.items() if k != "sample"},
+            }
+
+        if stage == "fields":
+            parsed_fields, errors = _parse_fields_spec(raw_message)
+            if errors:
+                return {
+                    "conversation_id": conversation_id,
+                    "stage": state["stage"],
+                    "assistant": " ".join(errors),
+                    "state": {k: v for k, v in state.items() if k != "sample"},
+                }
+
+            sanitized = []
+            seen = set()
+            for field in parsed_fields:
+                name = sanitize_identifier(field["name"], "field name")
+                if name in seen:
+                    raise ValueError(f"Duplicate field name: {name}")
+                seen.add(name)
+                sanitized.append({"name": name, "type": field["type"]})
+
+            state["fields"] = sanitized
+            state["sample"] = {}
+            state["sample_index"] = 0
+            state["stage"] = "sample"
+            return {
+                "conversation_id": conversation_id,
+                "stage": state["stage"],
+                "assistant": "Perfect. Now we will add 1 sample record. " + _db_builder_next_prompt(state),
+                "state": {k: v for k, v in state.items() if k != "sample"},
+            }
+
+        if stage == "sample":
+            fields = state.get("fields") or []
+            idx = int(state.get("sample_index") or 0)
+            if idx < len(fields):
+                field = fields[idx]
+                state["sample"][field["name"]] = raw_message
+                state["sample_index"] = idx + 1
+
+            idx = int(state.get("sample_index") or 0)
+            if idx < len(fields):
+                return {
+                    "conversation_id": conversation_id,
+                    "stage": state["stage"],
+                    "assistant": _db_builder_next_prompt(state),
+                    "state": {k: v for k, v in state.items() if k != "sample"},
+                }
+
+            # Build it now
+            db_payload = DbBuilderRequest(
+                db_type=state["db_type"],
+                db_name=state["db_name"],
+                use_case=state.get("use_case"),
+                entity_name=state["entity_name"],
+                fields=[DbFieldSpec(**f) for f in fields],
+                sample=state.get("sample") or {},
+            )
+
+            if state["db_type"] == "sqlite":
+                result = create_sqlite_database(db_payload)
+                state["stage"] = "done"
+                return {
+                    "conversation_id": conversation_id,
+                    "stage": state["stage"],
+                    "assistant": (
+                        f"Created SQLite database at: {result['db_path']} . "
+                        f"Table: {result['table']} . Inserted 1 sample row. Type 'restart' to build another."
+                    ),
+                    "result": result,
+                    "state": {k: v for k, v in state.items() if k != "sample"},
+                }
+
+            try:
+                result = create_mongo_database(db_payload)
+                state["stage"] = "done"
+                return {
+                    "conversation_id": conversation_id,
+                    "stage": state["stage"],
+                    "assistant": (
+                        f"Inserted 1 sample document into MongoDB database '{result['database']}', collection '{result['collection']}'. "
+                        f"Type 'restart' to build another."
+                    ),
+                    "result": result,
+                    "state": {k: v for k, v in state.items() if k != "sample"},
+                }
+            except Exception as exc:
+                result = create_json_document_store(db_payload)
+                state["stage"] = "done"
+                return {
+                    "conversation_id": conversation_id,
+                    "stage": state["stage"],
+                    "assistant": (
+                        "I could not connect to MongoDB on this machine (mongodb://localhost:27017). "
+                        f"I saved a local JSON document store instead at: {result['store_path']} . "
+                        f"Details: {exc}. Type 'restart' to build another."
+                    ),
+                    "result": result,
+                    "state": {k: v for k, v in state.items() if k != "sample"},
+                }
+
+        # done or unknown stage
+        state["stage"] = "done"
+        return {
+            "conversation_id": conversation_id,
+            "stage": state["stage"],
+            "assistant": _db_builder_next_prompt(state),
+            "state": {k: v for k, v in state.items() if k != "sample"},
+        }
+    except Exception as exc:
+        return {
+            "conversation_id": conversation_id,
+            "stage": state.get("stage"),
+            "assistant": f"Error: {exc}. Type 'restart' to try again.",
+            "state": {k: v for k, v in state.items() if k != "sample"},
+        }
 
 
 @app.post("/excel-agent/ask")
@@ -1258,6 +2654,46 @@ def mcp_signup(payload: McpSignupRequest):
         return create_mcp_signup(payload)
     except Exception as exc:
         return {"success": False, "error": str(exc)}
+
+
+@app.post("/simple-chatbot/ask")
+def simple_chatbot_ask(payload: SimpleChatRequest):
+    message = (payload.message or "").strip()
+    if not message:
+        return {"reply": None, "error": "Please enter a message."}
+
+    recent_history = []
+    for item in (payload.history or [])[-8:]:
+        text = str(item.get("text") or "").strip()
+        if not text:
+            continue
+        role = "Assistant" if str(item.get("role") or "").lower() == "assistant" else "User"
+        recent_history.append(f"{role}: {text}")
+
+    conversation_context = "\n".join(recent_history) if recent_history else "No prior conversation."
+    prompt = f"""
+You are a friendly and helpful chatbot for a simple demo web app.
+Keep responses concise, clear, and practical.
+If the user asks for steps, prefer short numbered guidance.
+If you are unsure about something, say so honestly.
+
+Conversation so far:
+{conversation_context}
+
+User: {message}
+Assistant:
+"""
+
+    try:
+        model = genai.GenerativeModel("models/gemini-flash-latest")
+        response = model.generate_content(prompt)
+        reply = (response.text or "").strip()
+        if not reply:
+            reply = "I could not generate a reply just now. Please try again."
+
+        return {"reply": reply, "error": None}
+    except Exception as exc:
+        return {"reply": None, "error": str(exc)}
 
 
 @app.post("/ask")
