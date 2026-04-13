@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darshan Academy Clone</title>
+    <style>
+        :root {
+            --primary-red: #B32D2E;
+            --primary-yellow: #E9C127;
+            --light-grey: #f4f4f4;
+            --dark-grey: #333;
+            --text-grey: #666;
+            --blue-link: #337ab7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-grey);
+            background-color: #fff;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Top Header */
+        .top-bar {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+
+        .top-bar-inner {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            font-size: 13px;
+            color: #777;
+        }
+
+        .top-bar-inner div {
+            padding: 0 15px;
+            border-right: 1px solid #ddd;
+        }
+
+        .top-bar-inner div:last-child {
+            border-right: none;
+        }
+
+        /* Main Header */
+        .main-header {
+            padding: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-placeholder {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #e74c3c, #f1c40f);
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .site-title {
+            color: var(--primary-red);
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Navigation */
+        .nav-bar {
+            background: #fff;
+            border-top: 1px solid #eee;
+            padding: 10px 0;
+        }
+
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .main-nav {
+            display: flex;
+        }
+
+        .main-nav li {
+            padding: 0 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+        }
+
+        .main-nav li:hover {
+            color: var(--primary-red);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .social-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .icon-email { background: #5bc0de; }
+        .icon-insta { background: #e1306c; }
+        .icon-fb { background: #3b5998; }
+        .icon-yt { background: #ff0000; }
+        .icon-blog { background: #f39c12; }
+
+        /* Hero Slider */
+        .hero {
+            position: relative;
+            height: 450px;
+            background: #ddd;
+            overflow: hidden;
+        }
+
+        .hero-img-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            position: relative;
+        }
+        
+        .hero-img-placeholder::after {
+            content: "Banner Image: Happy Children Students";
+            font-weight: bold;
+        }
+
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            transform: translateY(-50%);
+        }
+
+        .arrow {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .dots {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .dot.active { background: #00bcd4; width: 24px; border-radius: 10px; }
+
+        /* Action Grid */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            color: white;
+        }
+
+        .action-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 13px;
+        }
+
+        .action-item .icon {
+            font-size: 30px;
+            margin-right: 15px;
+            opacity: 0.9;
+        }
+
+        .bg-red-dark { background: #962121; }
+        .bg-red-mid { background: #a52a2a; }
+        .bg-purple { background: #8e24aa; }
+        .bg-yellow { background: var(--primary-yellow); color: #fff; padding-right: 40px; position: relative;}
+        .bg-yellow h2 { font-size: 24px; line-height: 1.1; text-transform: none;}
+        .bg-yellow .arrow-circle {
+            position: absolute;
+            right: 20px;
+            font-size: 24px;
+        }
+
+        /* Info Cards */
+        .info-section {
+            padding: 50px 0;
+            background: #fff;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .info-card {
+            text-align: center;
+        }
+
+        .card-img {
+            height: 200px;
+            background: #eee;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .info-card h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .info-card p {
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .read-more {
+            color: var(--blue-link);
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* Quote Section */
+        .quote-section {
+            background: #eee;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .quote-section h4 {
+            color: var(--primary-red);
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            font-size: 14px;
+        }
+
+        .quote-section p {
+            font-style: italic;
+            font-size: 18px;
+            font-weight: 600;
+            max-width: 800px;
+            margin: 0 auto 10px;
+        }
+
+        .quote-section .author {
+            color: var(--primary-red);
+            font-size: 13px;
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        /* Founder & Video Section */
+        .featured-section {
+            padding: 60px 0;
+        }
+
+        .featured-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 40px;
+        }
+
+        .founder-card {
+            border: 1px solid #ddd;
+            padding: 30px;
+            position: relative;
+            text-align: center;
+        }
+
+        .founder-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #ccc;
+            margin: 0 auto 20px;
+            overflow: hidden;
+            border: 4px solid #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .founder-card h3 {
+            font-size: 20px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .founder-card .title {
+            color: var(--blue-link);
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .founder-card .bio-text {
+            font-size: 13px;
+            text-align: left;
+            color: #666;
+        }
+
+        .video-side h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .video-box {
+            width: 100%;
+            height: 300px;
+            background: #333;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            border-radius: 4px;
+        }
+
+        .play-btn {
+            width: 70px;
+            height: 50px;
+            background: red;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        /* Features Maroon Grid */
+        .maroon-grid-section {
+            background: var(--primary-red);
+            padding: 60px 0;
+            color: white;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+
+        .feature-item {
+            display: flex;
+            gap: 15px;
+        }
+
+        .feature-icon-box {
+            width: 50px;
+            height: 40px;
+            background: #fff;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .feature-item.green-icon .feature-icon-box { background: #4caf50; }
+        .feature-item.orange-icon .feature-icon-box { background: #ff9800; }
+        .feature-item.cyan-icon .feature-icon-box { background: #00bcd4; }
+        .feature-item.pink-icon .feature-icon-box { background: #e91e63; }
+        .feature-item.blue-icon .feature-icon-box { background: #2196f3; }
+
+        .feature-item h4 {
+            font-size: 15px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .feature-item p {
+            font-size: 12px;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        /* Latest News */
+        .news-section {
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .news-section h2 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .all-news {
+            color: var(--blue-link);
+            font-size: 12px;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 30px;
+        }
+
+        .news-card {
+            text-align: left;
+            border: 1px solid #eee;
+        }
+
+        .news-img {
+            height: 180px;
+            background: #ddd;
+        }
+
+        .news-content {
+            padding: 20px;
+        }
+
+        .news-date {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .news-card h4 {
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .news-footer {
+            padding: 40px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* Footer */
+        .footer {
+            background: #f1f1f1;
+            padding: 60px 0 20px;
+            font-size: 13px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr 0.8fr 1.2fr;
+            gap: 40px;
+        }
+
+        .footer-col h4 {
+            font-size: 15px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            color: #444;
+        }
+
+        .footer-logo-area {
+            color: var(--primary-red);
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .footer-col p {
+            color: #777;
+            margin-bottom: 20px;
+        }
+
+        .btn-brochure {
+            background: #6495ed;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            display: inline-block;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 8px;
+            color: #777;
+        }
+
+        .contact-col {
+            background: #a52a2a;
+            color: white;
+            padding: 30px;
+            margin-top: -60px;
+        }
+
+        .contact-col h4 { color: white; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px;}
+        .contact-col p { color: white; font-size: 12px; margin-bottom: 10px;}
+        
+        .footer-bottom {
+            margin-top: 40px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+            font-size: 11px;
+            color: #999;
+        }
+
+        /* SVGs and Icons */
+        .icon-svg {
+            fill: currentColor;
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (max-width: 992px) {
+            .card-grid, .features-grid, .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .featured-grid {
+                grid-template-columns: 1fr;
+            }
+            .action-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card-grid, .features-grid, .footer-grid, .action-grid {
+                grid-template-columns: 1fr;
+            }
+            .top-bar-inner {
+                justify-content: center;
+            }
+            .main-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .nav-inner {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .main-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<section style="max-width: 1200px; margin: 24px auto; padding: 0 24px;">
+      <img onerror="this.onerror=null;this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%221200%22%20height%3D%22800%22%20viewBox%3D%220%200%201200%20800%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23f5efe6%22/%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%2250%25%22%20stop-color%3D%22%23e4edf2%22/%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23f7f9fc%22/%3E%0A%20%20%20%20%20%20%20%20%3C/linearGradient%3E%0A%20%20%20%20%20%20%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%221200%22%20height%3D%22800%22%20fill%3D%22url%28%23bg%29%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22220%22%20cy%3D%22180%22%20r%3D%22120%22%20fill%3D%22%23d8643b%22%20opacity%3D%220.18%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22980%22%20cy%3D%22220%22%20r%3D%22160%22%20fill%3D%22%231f6f73%22%20opacity%3D%220.16%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%22180%22%20y%3D%22220%22%20width%3D%22840%22%20height%3D%22360%22%20rx%3D%2232%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.88%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22600%22%20y%3D%22360%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2254%22%20font-weight%3D%22700%22%20fill%3D%22%2317202b%22%3EUploaded%20screenshot%20reference%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22600%22%20y%3D%22430%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2226%22%20fill%3D%22%235e6a76%22%3EGenerated%20placeholder%20image%3C/text%3E%0A%20%20%20%20%3C/svg%3E';this.style.objectFit='cover';this.style.background='#f7f4ee';"
+        src="/image-to-html/assets/screenshot-9-4-2026-164236-darshanacademy-org-20260409-170605.jpeg"
+        alt="Uploaded screenshot reference"
+        style="display: block; width: 100%; max-height: 520px; object-fit: cover; border-radius: 24px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);"
+      />
+    </section>
+
+    <!-- Header -->
+    <header>
+        <div class="top-bar">
+            <div class="container top-bar-inner">
+                <div>Our Schools</div>
+                <div>Contact Us</div>
+                <div>Alumni</div>
+            </div>
+        </div>
+        <div class="container main-header">
+            <div class="logo-section">
+                <div class="logo-placeholder">
+                    DARSHAN ACADEMY
+                </div>
+                <div class="site-title">Darshan Academy</div>
+            </div>
+        </div>
+        <div class="nav-bar">
+            <div class="container nav-inner">
+                <ul class="main-nav">
+                    <li style="color: var(--primary-red);">Home</li>
+                    <li>Organisation ▾</li>
+                    <li>Academics ▾</li>
+                    <li>Holistic Education ▾</li>
+                    <li>Life at DA ▾</li>
+                    <li>News</li>
+                </ul>
+                <div class="social-icons">
+                    <div class="social-icon icon-email">✉</div>
+                    <div class="social-icon icon-insta">📸</div>
+                    <div class="social-icon icon-fb">f</div>
+                    <div class="social-icon icon-yt">▶</div>
+                    <div class="social-icon icon-blog">W</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Slider -->
+    <section class="hero">
+        <div class="hero-img-placeholder"></div>
+        <div class="slider-nav">
+            <div class="arrow">❮</div>
+            <div class="arrow">❯</div>
+        </div>
+        <div class="dots">
+            <div class="dot"></div>
+            <div class="dot active"></div>
+            <div class="dot"></div>
+        </div>
+    </section>
+
+    <!-- Action Grid -->
+    <div class="action-grid">
+        <div class="action-item bg-red-dark">
+            <span class="icon">🏆</span>
+            SILVER JUBILEE
+        </div>
+        <div class="action-item bg-red-mid">
+            <span class="icon">🖼️</span>
+            Picture Gallery
+        </div>
+        <div class="action-item bg-purple">
+            <span class="icon">🌸</span>
+            PEARL JUBILEE
+        </div>
+        <div class="action-item bg-yellow">
+            <div>
+                <h2>Discover DA<br>New Horizons</h2>
+            </div>
+            <span class="arrow-circle">➜</span>
+        </div>
+    </div>
+
+    <!-- Info Section -->
+    <section class="info-section">
+        <div class="container">
+            <div class="card-grid">
+                <div class="info-card">
+                    <div class="card-img" style="background: linear-gradient(135deg, #eee, #ccc);">
+                        <div style="padding-top: 80px; color: #888;">School Campus</div>
+                    </div>
+                    <h3>Chain of 24 Schools in India & Colombia</h3>
+                    <p>Darshan Academy has branches all over India and Colombia</p>
+                </div>
+                <div class="info-card">
+                    <div class="card-img" style="background: linear-gradient(135deg, #ddd, #bbb);">
+                        <div style="padding-top: 80px; color: #888;">Students Group</div>
+                    </div>
+                    <h3>About Us?</h3>
+                    <p>Darshan Academy Education Foundation has developed a unique holistic concept for schools that helps children develop their highest potential...</p>
+                    <a data-nav-id="nav-1" href="#" class="read-more">READ MORE</a>
+                </div>
+                <div class="info-card">
+                    <div class="card-img" style="background: linear-gradient(135deg, #ccc, #aaa);">
+                        <div style="padding-top: 80px; color: #888;">Celebration</div>
+                    </div>
+                    <h3>Celebrating 25 Years</h3>
+                    <p>Embarking on the journey to spread the message of love and peace, Darshan Academy Foundation celebrated Silver Jubilee "Sparkling Souls Spreading Peace".</p>
+                    <a data-nav-id="nav-2" href="#" class="read-more">READ MORE</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quote Section -->
+    <section class="quote-section">
+        <div class="container">
+            <h4>TODAY'S QUOTE</h4>
+            <p>" Rather than share with others a piece of your mind, share the peace of your soul. "</p>
+            <div class="author">~ Sant Rajinder Singh Ji Maharaj</div>
+        </div>
+    </section>
+
+    <!-- Featured Section -->
+    <section class="featured-section">
+        <div class="container featured-grid">
+            <div class="founder-card">
+                <h3>Sant Rajinder Singh Ji Maharaj</h3>
+                <span class="title">Founder, Chairman, DEF</span>
+                <div class="founder-img">
+                    <div style="background: #999; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white;">Photo</div>
+                </div>
+                <div class="bio-text">
+                    <p>It is easy for a child to gain knowledge. Research has shown that children can learn faster and can learn more languages than grown-ups. If we can include some spiritual teachings in our educational systems throughout the world, then fifteen, twenty, or twenty-five years from now, we will turn out human beings who would have love and compassion in their hearts for other human beings.</p>
+                </div>
+                <a data-nav-id="nav-3" href="#" class="read-more" style="display: block; text-align: left; margin-top: 10px;">READ MORE</a>
+            </div>
+            <div class="video-side">
+                <h3>Darshan Academy featured in Great Indian Schools exclusively on National Geographic Channel</h3>
+                <div class="video-box">
+                    <div style="position: absolute; top: 10px; left: 10px; display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 30px; height: 30px; background: orange; border-radius: 50%;"></div>
+                        <span>Darshan Academy featured...</span>
+                    </div>
+                    <div class="play-btn">▶</div>
+                    <div style="position: absolute; bottom: 10px; right: 10px; font-size: 12px;">Watch on YouTube</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Red Section -->
+    <section class="maroon-grid-section">
+        <div class="container features-grid">
+            <div class="feature-item cyan-icon">
+                <div class="feature-icon-box">📘</div>
+                <div>
+                    <h4>Our Mission</h4>
+                    <p>Darshan Academy is committed to helping students develop their full potential – physically, intellectually, artistically, emotionally, and spiritually.</p>
+                </div>
+            </div>
+            <div class="feature-item orange-icon">
+                <div class="feature-icon-box">⭐</div>
+                <div>
+                    <h4>Spiritual Curriculum</h4>
+                    <p>Darshan Academy provides students with an Education for inner and outer Peace</p>
+                </div>
+            </div>
+            <div class="feature-item pink-icon">
+                <div class="feature-icon-box">🤝</div>
+                <div>
+                    <h4>Positive Contribution to Society</h4>
+                    <p>Students learn how their actions can have a positive impact. Through helping people in need and improving the environment, they realize the value of service.</p>
+                </div>
+            </div>
+            <div class="feature-item bg-red-mid">
+                <div class="feature-icon-box" style="background: transparent;">📖</div>
+                <div>
+                    <h4>FOUNDED 1995</h4>
+                    <p>Darshan Academy is running 24 Schools in India and South America since 1995.</p>
+                </div>
+            </div>
+            <div class="feature-item green-icon">
+                <div class="feature-icon-box">📜</div>
+                <div>
+                    <h4>Transfer Certificate</h4>
+                    <p>Transfer Certificate details are available here from session 2024-2025. Please enter Admission / Enrollment number of the Student to generate Transfer Certificate.</p>
+                </div>
+            </div>
+            <div class="feature-item blue-icon">
+                <div class="feature-icon-box">🏅</div>
+                <div>
+                    <h4>Academics</h4>
+                    <p>We focus on enhancing cognitive development, critical thinking, and life skills in students.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Latest News -->
+    <section class="news-section">
+        <div class="container">
+            <h2>Latest news</h2>
+            <a data-nav-id="nav-4" href="#" class="all-news">ALL NEWS</a>
+            <div class="card-grid">
+                <div class="news-card">
+                    <div class="news-img" style="background: #ddd; display: flex; align-items: center; justify-content: center;">Group Photo</div>
+                    <div class="news-content">
+                        <span class="news-date">🗓 March 24, 2026</span>
+                        <h4>Darshan Academy, Pune, National Award Winner</h4>
+                        <a data-nav-id="nav-5" href="#" class="read-more">READ MORE</a>
+                    </div>
+                </div>
+                <div class="news-card">
+                    <div class="news-img" style="background: #ccc; display: flex; align-items: center; justify-content: center;">School Banner</div>
+                    <div class="news-content">
+                        <span class="news-date">🗓 March 23, 2026</span>
+                        <h4>Darshan Academy, Kalka, Proud Moment for the School!</h4>
+                        <a data-nav-id="nav-6" href="#" class="read-more">READ MORE</a>
+                    </div>
+                </div>
+                <div class="news-card">
+                    <div class="news-img" style="background: #bbb; display: flex; align-items: center; justify-content: center;">Award Ceremony</div>
+                    <div class="news-content">
+                        <span class="news-date">🗓 December 06, 2025</span>
+                        <h4>Darshan Academy, Hisar, Aditya – Gold at National Junior Athletic Championship</h4>
+                        <a data-nav-id="nav-7" href="#" class="read-more">READ MORE</a>
+                    </div>
+                </div>
+            </div>
+            <div class="news-footer">
+                Completed 25 Years of Journey: Alumni Tribute for Our Silver Jubilee
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <span class="footer-logo-area">Darshan Academy</span>
+                <p>Darshan Education Foundation has been providing students with an excellent all-round education since the inauguration of its first school, Darshan Academy Meerut, in India, in 1995.</p>
+                <a data-nav-id="nav-8" href="#" class="btn-brochure">GET BROCHURE</a>
+            </div>
+            <div class="footer-col">
+                <h4>OUR SCHOOL</h4>
+                <ul>
+                    <li>About us</li>
+                    <li>Our Vision</li>
+                    <li>Our Mission</li>
+                    <li>Academics</li>
+                    <li>Career</li>
+                    <li>Privacy Policy</li>
+                    <li>Help us to improve our Website!</li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>OUR LINKS</h4>
+                <ul>
+                    <li>News</li>
+                    <li>Poetry Festival</li>
+                    <li>Primary School</li>
+                    <li>Preschool</li>
+                    <li>Middle School</li>
+                    <li>Sr. Secondary</li>
+                    <li>Workshops</li>
+                </ul>
+            </div>
+            <div class="footer-col contact-col">
+                <h4>CONTACT US:</h4>
+                <p><strong>HEAD OFFICE</strong></p>
+                <p>Darshan Education Foundation, Sant Kirpal Singh Marg, Vijay Nagar Delhi - 110009, India</p>
+                <p>👤 Facebook</p>
+                <p>📷 Instagram</p>
+                <p>📞 011-47087350, 8588806002</p>
+                <p>✉ info@darshanacademy.org</p>
+                <p>🎥 YouTube</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2025 All Rights Reserved
+        </div>
+    </footer>
+
+</body>
+</html>

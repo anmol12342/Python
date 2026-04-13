@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+import gemini_embedding_search as gemini_embedding_demo
 import os
 import pymongo
 import json
@@ -43,6 +44,10 @@ class Prompt(BaseModel):
 
 
 class RagQuestion(BaseModel):
+    question: str
+
+
+class GeminiEmbeddingQueryRequest(BaseModel):
     question: str
 
 
@@ -118,6 +123,7 @@ class SupportTicketUpdateRequest(BaseModel):
 
 
 DB_BUILDER_CONVERSATIONS: dict[str, dict] = {}
+GEMINI_EMBEDDING_STORE_CACHE: list[dict] | None = None
 
 SUPPORT_KNOWLEDGE_BASE = [
     {
@@ -428,6 +434,26 @@ def load_rag_demo():
         "chunks": chunks,
         "records": records,
         "store_path": store_path,
+    }
+
+
+def load_gemini_embedding_demo():
+    global GEMINI_EMBEDDING_STORE_CACHE
+
+    client, types_module, model_name = gemini_embedding_demo.create_gemini_client()
+    if GEMINI_EMBEDDING_STORE_CACHE is None:
+        GEMINI_EMBEDDING_STORE_CACHE = gemini_embedding_demo.build_embedding_store(
+            gemini_embedding_demo.DOCUMENTS,
+            client,
+            types_module,
+            model_name,
+        )
+
+    return {
+        "client": client,
+        "types_module": types_module,
+        "model_name": model_name,
+        "records": GEMINI_EMBEDDING_STORE_CACHE,
     }
 
 
@@ -1684,6 +1710,12 @@ def rag_page():
     return FileResponse(os.path.join(BASE_DIR, "rag.html"))
 
 
+@app.get("/gemini-embedding-search")
+@app.get("/azure-embedding-search")
+def gemini_embedding_search_page():
+    return FileResponse(os.path.join(BASE_DIR, "azure_embedding_search.html"))
+
+
 @app.get("/it-agent")
 def it_agent_page():
     return FileResponse(os.path.join(BASE_DIR, "excel_agent.html"))
@@ -1770,6 +1802,42 @@ def rag_query(payload: RagQuestion):
             "record_count": len(demo["records"]),
         }
     }
+
+
+@app.post("/gemini-embedding-search/query")
+@app.post("/azure-embedding-search/query")
+def gemini_embedding_search_query(payload: GeminiEmbeddingQueryRequest):
+    question = (payload.question or "").strip()
+    if not question:
+        return {
+            "question": None,
+            "results": [],
+            "error": "Please enter a question before running the search.",
+        }
+
+    try:
+        demo = load_gemini_embedding_demo()
+        results = gemini_embedding_demo.query_documents(
+            question=question,
+            embedding_store=demo["records"],
+            client=demo["client"],
+            types_module=demo["types_module"],
+            model_name=demo["model_name"],
+            top_k=2,
+        )
+        return {
+            "question": question,
+            "results": results,
+            "document_count": len(demo["records"]),
+            "search_mode": "gemini-embeddings",
+            "embedding_model": demo["model_name"],
+        }
+    except Exception as exc:
+        return {
+            "question": question,
+            "results": [],
+            "error": str(exc),
+        }
 
 
 @app.post("/support-chat/query")
